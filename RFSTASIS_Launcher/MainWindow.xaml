@@ -14,9 +14,17 @@
      TextOptions.TextRenderingMode="Auto"
      Background="{DynamicResource MaterialDesignPaper}"
      FontFamily="{DynamicResource MaterialDesignFont}">
+    <Window.DataContext>
+        <local:VM/>
+    </Window.DataContext>
     <Grid>
-        <materialDesign:Card Padding="32" Margin="16">
-            <TextBlock Style="{DynamicResource MaterialDesignTitleTextBlock}">My First Material Design App</TextBlock>
-        </materialDesign:Card>
+        <StackPanel>
+            <materialDesign:Card Padding="32" Margin="16">
+                <TextBlock Style="{DynamicResource MaterialDesignTitleTextBlock}">My First Material Design App</TextBlock>
+            </materialDesign:Card>
+            <materialDesign:Card Padding="32" Margin="16">
+                <TextBlock Text="{Binding Text}"/>
+            </materialDesign:Card>
+        </StackPanel>
     </Grid>
 </Window>
