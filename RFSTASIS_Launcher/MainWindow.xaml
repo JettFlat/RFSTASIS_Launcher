@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RFSTASIS_Launcher"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="MainWindow"
+        SizeToContent="WidthAndHeight"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
      TextElement.Foreground="{DynamicResource MaterialDesignBody}"
      TextElement.FontWeight="Regular"
@@ -20,7 +21,7 @@
     <Grid>
         <StackPanel>
             <materialDesign:Card Padding="32" Margin="16">
-                <TextBlock Style="{DynamicResource MaterialDesignTitleTextBlock}">My First Material Design App</TextBlock>
+                <Button Content="Download"/>
             </materialDesign:Card>
             <materialDesign:Card Padding="32" Margin="16">
                 <TextBlock Text="{Binding Text}"/>
