@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RFSTASIS_Launcher", "RFSTASIS_Launcher\RFSTASIS_Launcher.csproj", "{FAFF4B02-B0B2-40C3-9665-95F15B89CCB0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FAFF4B02-B0B2-40C3-9665-95F15B89CCB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAFF4B02-B0B2-40C3-9665-95F15B89CCB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAFF4B02-B0B2-40C3-9665-95F15B89CCB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAFF4B02-B0B2-40C3-9665-95F15B89CCB0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7B70DCE7-CD3D-44B9-85A9-E3D4B5357A18}
+	EndGlobalSection
+EndGlobal
