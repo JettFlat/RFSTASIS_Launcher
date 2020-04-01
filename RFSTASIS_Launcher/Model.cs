@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace RFSTASIS_Launcher
 {
@@ -13,10 +15,11 @@ namespace RFSTASIS_Launcher
         static public void Start()
         {
             //Hash.CompareFiles();
-            //var test = Server.GetStream("http://update1.rfstasis.com/clientpatch/Adv.dll");
-            //using var file2 = File.OpenRead(@"D:\WORK\RFSTASIS_Launcher\Adv.dll");
-            ////var res = MD5Hash.Compare(test, file2);
+            //var test = Server.GetStream("http://update1.rfstasis.com/clientpatch/Character/Monster/Tex/EXILET.RFS");
+            //using var file2 = File.OpenRead(@"D:\temp\OldLauncher\oldlaunchercode\New Launcher\rlgn\bin\Debug\Character\Monster\Tex\EXILET.RFS");
+            //var hash = MD5Hash.GetHash(file2);
             var res = GameClient.GetFilesHash();
+            FileInfoContainer.Write(res);
         }
         public class Server
         {
@@ -43,7 +46,6 @@ namespace RFSTASIS_Launcher
                     {
                         var hash = md5hash.ComputeHash(file);
                         return BitConverter.ToString(hash).Replace("-", string.Empty).ToLower();
-                        //return Convert.ToBase64String(hash);
                     }
                 }
                 finally
@@ -99,7 +101,16 @@ namespace RFSTASIS_Launcher
             public string Name { get; set; }
             public string Path { get; set; }
             public DateTime DateEdit { get; set; }
-            public string MD5Hash { get; set; } 
+            public string MD5Hash { get; set; }
+            public static void Write(List<FileInfoContainer> collection, string PathToWrtie = ".\\HashSum.json")
+            {
+                File.WriteAllText(PathToWrtie, JsonConvert.SerializeObject(collection));
+                //File.WriteAllLines(PathToWrtie, collection.Select(x => $"{x.MD5Hash} * {x.Name} * {x.DateEdit.ToString("dd/MM/yyyy HH:mm")} * {x.Path}"));
+            }
+            public static List<FileInfoContainer> Read(string PathToRead = ".\\HashSum.json")
+            {
+                return JsonConvert.DeserializeObject<List<FileInfoContainer>>(File.ReadAllText(PathToRead));
+            }
         }
     }
 }
