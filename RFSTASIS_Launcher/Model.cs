@@ -17,7 +17,7 @@ namespace RFSTASIS_Launcher
     class Model
     {
         public static Settings SettingsCur = Settings.Deserialize();
-        static ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism=1 };
+        static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
         static public void Start()
         {
             Server.Parse();
@@ -26,16 +26,20 @@ namespace RFSTASIS_Launcher
         {
             public string WebClientPath { get; set; }
             public List<string> FilesToIgnore { get; set; }
-            //TODO add Files to igore
             public static Settings Deserialize(string path = "Settings.json")
             {
                 if (File.Exists(path))
                     return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(path));
                 else
                 {
-                    var set =  new Settings { WebClientPath = "http://update1.rfstasis.com/clientpatch", FilesToIgnore = new List<string> {
+                    var set = new Settings
+                    {
+                        WebClientPath = "http://update1.rfstasis.com/clientpatch/",
+                        FilesToIgnore = new List<string> {
                         "MD5 Hash Updater.deps.json","MD5 Hash Updater.dll","MD5 Hash Updater.exe","MD5 Hash Updater.pdb","MD5 Hash Updater.runtimeconfig.dev.json","MD5 Hash Updater.runtimeconfig.json"
-                    } };
+                        ,"Exceptions.txt"
+                    }
+                    };
                     set.Serialize();
                     return set;
                 }
@@ -51,8 +55,6 @@ namespace RFSTASIS_Launcher
         public class Server
         {
             static BlockingCollection<string> Paths { get; set; } = new BlockingCollection<string> { SettingsCur.WebClientPath };
-            public delegate void MethodContainer();
-            public static event MethodContainer PathsChanged;
             static BlockingCollection<string> FilesLink { get; set; } = new BlockingCollection<string>();
             public static Stream GetStream(string Url)
             {
@@ -80,38 +82,40 @@ namespace RFSTASIS_Launcher
             }
             public static void Parse()
             {
-                if (PathsChanged==null)
-                    PathsChanged += Server_PathsChanged;
-                string url = Paths.Take();
-                var page = new WebClient().DownloadString(url);
-                var config = Configuration.Default;
-                var context = BrowsingContext.New(config);
-                var document = context.OpenAsync(req => req.Content(page)).Result;
-                var list = document.QuerySelectorAll("a").ToList();
-                list.RemoveRange(0, 5);
-                Parallel.ForEach(list, parallelOptions, o =>
+                while (Paths.Count > 0)
                 {
-                    var text = (o as AngleSharp.Dom.IElement)?.Attributes[0]?.Value;
-                    var textdecoded = WebUtility.UrlDecode(text);
-                    var cpath = SettingsCur.WebClientPath + "/" + text;
-                    if (SettingsCur.FilesToIgnore.Any(x => textdecoded.ToLower().Contains(x.ToLower())))
-                        return;
-                    if (text.Contains('/'))
+                    string url = Paths.Take();
+                    try
                     {
-                        Paths.Add(cpath);
-                        PathsChanged?.Invoke();
+                        var page = new WebClient().DownloadString(url);
+                        var config = Configuration.Default;
+                        var context = BrowsingContext.New(config);
+                        var document = context.OpenAsync(req => req.Content(page)).Result;
+                        var list = document.QuerySelectorAll("a").ToList();
+                        list.RemoveRange(0, 5);
+                        Parallel.ForEach(list, parallelOptions, o =>
+                        {
+                            var text = (o as AngleSharp.Dom.IElement)?.Attributes[0]?.Value;
+                            var textdecoded = WebUtility.UrlDecode(text);
+                            var cpath = url + text;
+                            if (SettingsCur.FilesToIgnore.Any(x => textdecoded.ToLower().Contains(x.ToLower())))
+                                return;
+                            if (text.Contains('/'))
+                            {
+                                Paths.Add(cpath);
+                            }
+                            else
+                            {
+                                FilesLink.Add(cpath);
+                            }
+                        });
                     }
-                    else
+                    catch (Exception exc)
                     {
-                        FilesLink.Add(cpath);
-                    }
-                });
-            }
 
-            private static void Server_PathsChanged()
-            {
-                if (Paths.Count > 0)
-                    Parse();
+                    }
+                }
+                File.WriteAllText("FilesLink.txt", JsonConvert.SerializeObject(FilesLink));
             }
         }
         public class MD5Hash
