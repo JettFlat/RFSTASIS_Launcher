@@ -51,6 +51,8 @@ namespace RFSTASIS_Launcher
         public class Server
         {
             static BlockingCollection<string> Paths { get; set; } = new BlockingCollection<string> { SettingsCur.WebClientPath };
+            public delegate void MethodContainer();
+            public static event MethodContainer PathsChanged;
             static BlockingCollection<string> FilesLink { get; set; } = new BlockingCollection<string>();
             public static Stream GetStream(string Url)
             {
@@ -76,8 +78,11 @@ namespace RFSTASIS_Launcher
                 }
                 return null;
             }
-            public static void Parse(string url = "http://update1.rfstasis.com/clientpatch/")
+            public static void Parse()
             {
+                if (PathsChanged==null)
+                    PathsChanged += Server_PathsChanged;
+                string url = Paths.Take();
                 var page = new WebClient().DownloadString(url);
                 var config = Configuration.Default;
                 var context = BrowsingContext.New(config);
@@ -92,12 +97,21 @@ namespace RFSTASIS_Launcher
                     if (SettingsCur.FilesToIgnore.Any(x => textdecoded.ToLower().Contains(x.ToLower())))
                         return;
                     if (text.Contains('/'))
+                    {
                         Paths.Add(cpath);
+                        PathsChanged?.Invoke();
+                    }
                     else
                     {
                         FilesLink.Add(cpath);
                     }
                 });
+            }
+
+            private static void Server_PathsChanged()
+            {
+                if (Paths.Count > 0)
+                    Parse();
             }
         }
         public class MD5Hash
