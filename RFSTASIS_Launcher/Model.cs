@@ -7,35 +7,73 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
+using System.Net.Http;
 
 namespace RFSTASIS_Launcher
 {
     class Model
     {
+        public static Settings SettingsCur = Settings.Deserialize(); 
         static public void Start()
         {
-            //Hash.CompareFiles();
-            //var test = Server.GetStream("http://update1.rfstasis.com/clientpatch/Character/Monster/Tex/EXILET.RFS");
-            //using var file2 = File.OpenRead(@"D:\temp\OldLauncher\oldlaunchercode\New Launcher\rlgn\bin\Debug\Character\Monster\Tex\EXILET.RFS");
-            //var hash = MD5Hash.GetHash(file2);
-            //var test = Path.GetRelativePath(@"D:\temp\OldLauncher\oldlaunchercode\New Launcher\rlgn\bin\Debug", @"D:\temp\OldLauncher\oldlaunchercode\New Launcher\rlgn\bin\Debug\Character\Monster\Tex\EXILET.RFS");
-            var res = GameClient.GetFilesHash();
-            FileInfoContainer.Write(res);
+
         }
+        public class Settings
+        {
+            public string WebClientPath { get; set; }
+            public static Settings Deserialize(string path = "Settings.json")
+            {
+                if (File.Exists(path))
+                    return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(path));
+                else
+                {
+                    return new Settings { WebClientPath = "http://update1.rfstasis.com/clientpatch" };
+                }
+            }
+            public void Serialize(string path = "Settings.json")
+            {
+                
+                    File.WriteAllText(path, JsonConvert.SerializeObject(this));
+                
+            }
+        }
+
         public class Server
         {
-            static public Stream GetStream(string Url)
+            //ConcurrentBag<FileInfoContainer> Files { get; set; } = new ConcurrentBag<FileInfoContainer>();
+            static BlockingCollection<string> Paths { get; set; } = new BlockingCollection<string> { SettingsCur.WebClientPath };
+            ConcurrentBag<string> FilesLink { get; set; } = new ConcurrentBag<string>();
+            public static Stream GetStream(string Url)
             {
                 HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(Url);
                 HttpWebResponse Response = (HttpWebResponse)Request.GetResponse();
                 var str = Response.GetResponseStream();
                 return str;
             }
-            //public static IEnumerable ParseFiles(string Url)
-            //{
+            public static async Task<string> DownloadPage(string url)
+            {
+                using (var client = new HttpClient())
+                {
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var code = response.StatusCode;
+                        if (code == HttpStatusCode.OK)
+                        {
+                            string responseBody = await response.Content.ReadAsStringAsync();
+                            return responseBody;
+                        }
+                    }
+                }
+                return null;
+            }
+            public static void Parse()
+            {
+                var page = new WebClient().DownloadString(Paths.First());
 
-            //    yield return;
-            //}
+
+            }
         }
         public class MD5Hash
         {
@@ -52,7 +90,7 @@ namespace RFSTASIS_Launcher
                 finally
                 {
                     if (file != null)
-                        file.DisposeAsync();
+                        file.Close();
                 }
             }
             public static bool Compare(Stream file1, Stream file2)
@@ -74,20 +112,21 @@ namespace RFSTASIS_Launcher
                 finally
                 {
                     if (file1 != null)
-                        file1.DisposeAsync();
+                        file1.Close();
                     if (file2 != null)
-                        file2.DisposeAsync();
+                        file2.Close();
                 }
             }
         }
         public class GameClient
         {
-            public static string Path => @"D:\temp\OldLauncher\oldlaunchercode\New Launcher\rlgn\bin\Debug";
-            public static List<FileInfoContainer> GetFilesHash()
+            public static string Path => Environment.CurrentDirectory;
+            public static ConcurrentBag<FileInfoContainer> GetFilesHash()
             {
-                List<FileInfoContainer> res = new List<FileInfoContainer>();
+                ConcurrentBag<FileInfoContainer> res = new ConcurrentBag<FileInfoContainer>();
                 var files = Directory.GetFiles(Path, "", SearchOption.AllDirectories);
-                Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 1 }, file => {
+                Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 1 }, file =>
+                {
                     var fi = new FileInfo(file);
                     var item = new FileInfoContainer { Name = fi.Name, FilePath = fi.FullName, DateEdit = fi.LastWriteTime };
                     using (var str = File.OpenRead(fi.FullName))
@@ -106,19 +145,18 @@ namespace RFSTASIS_Launcher
                 get => _FilePath;
                 set
                 {
-                    _FilePath = Path.GetRelativePath(value, Environment.CurrentDirectory);
+                    _FilePath = Path.GetRelativePath(Environment.CurrentDirectory, value);
                 }
             }
             public DateTime DateEdit { get; set; }
             public string MD5Hash { get; set; }
-            public static void Write(List<FileInfoContainer> collection, string PathToWrtie = ".\\HashSum.hs")
+            public static void Write(ConcurrentBag<FileInfoContainer> collection, string PathToWrtie = ".\\HashSum.hs")
             {
                 File.WriteAllText(PathToWrtie, JsonConvert.SerializeObject(collection));
-                //File.WriteAllLines(PathToWrtie, collection.Select(x => $"{x.MD5Hash} * {x.Name} * {x.DateEdit.ToString("dd/MM/yyyy HH:mm")} * {x.Path}"));
             }
-            public static List<FileInfoContainer> Read(string PathToRead = ".\\HashSum.hs")
+            public static ConcurrentBag<FileInfoContainer> Read(string PathToRead = ".\\HashSum.hs")
             {
-                return JsonConvert.DeserializeObject<List<FileInfoContainer>>(File.ReadAllText(PathToRead));
+                return JsonConvert.DeserializeObject<ConcurrentBag<FileInfoContainer>>(File.ReadAllText(PathToRead));
             }
         }
     }
