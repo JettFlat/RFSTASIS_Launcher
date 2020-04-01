@@ -9,41 +9,49 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Net.Http;
+using AngleSharp;
+using AngleSharp.Html.Dom;
 
 namespace RFSTASIS_Launcher
 {
     class Model
     {
-        public static Settings SettingsCur = Settings.Deserialize(); 
+        public static Settings SettingsCur = Settings.Deserialize();
+        static ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism=1 };
         static public void Start()
         {
-
+            Server.Parse();
         }
         public class Settings
         {
             public string WebClientPath { get; set; }
+            public List<string> FilesToIgnore { get; set; }
+            //TODO add Files to igore
             public static Settings Deserialize(string path = "Settings.json")
             {
                 if (File.Exists(path))
                     return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(path));
                 else
                 {
-                    return new Settings { WebClientPath = "http://update1.rfstasis.com/clientpatch" };
+                    var set =  new Settings { WebClientPath = "http://update1.rfstasis.com/clientpatch", FilesToIgnore = new List<string> {
+                        "MD5 Hash Updater.deps.json","MD5 Hash Updater.dll","MD5 Hash Updater.exe","MD5 Hash Updater.pdb","MD5 Hash Updater.runtimeconfig.dev.json","MD5 Hash Updater.runtimeconfig.json"
+                    } };
+                    set.Serialize();
+                    return set;
                 }
             }
             public void Serialize(string path = "Settings.json")
             {
-                
-                    File.WriteAllText(path, JsonConvert.SerializeObject(this));
-                
+
+                File.WriteAllText(path, JsonConvert.SerializeObject(this));
+
             }
         }
 
         public class Server
         {
-            //ConcurrentBag<FileInfoContainer> Files { get; set; } = new ConcurrentBag<FileInfoContainer>();
             static BlockingCollection<string> Paths { get; set; } = new BlockingCollection<string> { SettingsCur.WebClientPath };
-            ConcurrentBag<string> FilesLink { get; set; } = new ConcurrentBag<string>();
+            static BlockingCollection<string> FilesLink { get; set; } = new BlockingCollection<string>();
             public static Stream GetStream(string Url)
             {
                 HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(Url);
@@ -68,11 +76,28 @@ namespace RFSTASIS_Launcher
                 }
                 return null;
             }
-            public static void Parse()
+            public static void Parse(string url = "http://update1.rfstasis.com/clientpatch/")
             {
-                var page = new WebClient().DownloadString(Paths.First());
-
-
+                var page = new WebClient().DownloadString(url);
+                var config = Configuration.Default;
+                var context = BrowsingContext.New(config);
+                var document = context.OpenAsync(req => req.Content(page)).Result;
+                var list = document.QuerySelectorAll("a").ToList();
+                list.RemoveRange(0, 5);
+                Parallel.ForEach(list, parallelOptions, o =>
+                {
+                    var text = (o as AngleSharp.Dom.IElement)?.Attributes[0]?.Value;
+                    var textdecoded = WebUtility.UrlDecode(text);
+                    var cpath = SettingsCur.WebClientPath + "/" + text;
+                    if (SettingsCur.FilesToIgnore.Any(x => textdecoded.ToLower().Contains(x.ToLower())))
+                        return;
+                    if (text.Contains('/'))
+                        Paths.Add(cpath);
+                    else
+                    {
+                        FilesLink.Add(cpath);
+                    }
+                });
             }
         }
         public class MD5Hash
