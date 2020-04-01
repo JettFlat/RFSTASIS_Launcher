@@ -18,6 +18,7 @@ namespace RFSTASIS_Launcher
             //var test = Server.GetStream("http://update1.rfstasis.com/clientpatch/Character/Monster/Tex/EXILET.RFS");
             //using var file2 = File.OpenRead(@"D:\temp\OldLauncher\oldlaunchercode\New Launcher\rlgn\bin\Debug\Character\Monster\Tex\EXILET.RFS");
             //var hash = MD5Hash.GetHash(file2);
+            //var test = Path.GetRelativePath(@"D:\temp\OldLauncher\oldlaunchercode\New Launcher\rlgn\bin\Debug", @"D:\temp\OldLauncher\oldlaunchercode\New Launcher\rlgn\bin\Debug\Character\Monster\Tex\EXILET.RFS");
             var res = GameClient.GetFilesHash();
             FileInfoContainer.Write(res);
         }
@@ -86,9 +87,9 @@ namespace RFSTASIS_Launcher
             {
                 List<FileInfoContainer> res = new List<FileInfoContainer>();
                 var files = Directory.GetFiles(Path, "", SearchOption.AllDirectories);
-                Parallel.ForEach(files,/*new ParallelOptions { MaxDegreeOfParallelism = 1 },*/ file => {
+                Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 1 }, file => {
                     var fi = new FileInfo(file);
-                    var item = new FileInfoContainer { Name = fi.Name, Path = fi.FullName, DateEdit = fi.LastWriteTime };
+                    var item = new FileInfoContainer { Name = fi.Name, FilePath = fi.FullName, DateEdit = fi.LastWriteTime };
                     using (var str = File.OpenRead(fi.FullName))
                         item.MD5Hash = MD5Hash.GetHash(str);
                     res.Add(item);
@@ -99,15 +100,23 @@ namespace RFSTASIS_Launcher
         public class FileInfoContainer
         {
             public string Name { get; set; }
-            public string Path { get; set; }
+            string _FilePath;
+            public string FilePath
+            {
+                get => _FilePath;
+                set
+                {
+                    _FilePath = Path.GetRelativePath(value, Environment.CurrentDirectory);
+                }
+            }
             public DateTime DateEdit { get; set; }
             public string MD5Hash { get; set; }
-            public static void Write(List<FileInfoContainer> collection, string PathToWrtie = ".\\HashSum.json")
+            public static void Write(List<FileInfoContainer> collection, string PathToWrtie = ".\\HashSum.hs")
             {
                 File.WriteAllText(PathToWrtie, JsonConvert.SerializeObject(collection));
                 //File.WriteAllLines(PathToWrtie, collection.Select(x => $"{x.MD5Hash} * {x.Name} * {x.DateEdit.ToString("dd/MM/yyyy HH:mm")} * {x.Path}"));
             }
-            public static List<FileInfoContainer> Read(string PathToRead = ".\\HashSum.json")
+            public static List<FileInfoContainer> Read(string PathToRead = ".\\HashSum.hs")
             {
                 return JsonConvert.DeserializeObject<List<FileInfoContainer>>(File.ReadAllText(PathToRead));
             }
