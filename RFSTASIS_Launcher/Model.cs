@@ -11,11 +11,13 @@ using System.Collections.Concurrent;
 using System.Net.Http;
 using AngleSharp;
 using AngleSharp.Html.Dom;
+using System.Diagnostics;
 
 namespace RFSTASIS_Launcher
 {
     class Model
     {
+        static string ExecutionFileName { get; } = System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName;
         public static Settings SettingsCur = Settings.Deserialize();
         static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
         static public void Start()
@@ -128,7 +130,7 @@ namespace RFSTASIS_Launcher
                     using (var wc = new WebClient())
                         return wc.DownloadData(SettingsCur.WebClientPath + "HashSum.hs");
                 }
-                catch(Exception exc)
+                catch (Exception exc)
                 {
                     throw new Exception("No access to server", exc);
                 }
@@ -139,12 +141,18 @@ namespace RFSTASIS_Launcher
                    {
                        try
                        {
-                           string webpath = WebUtility.UrlDecode(SettingsCur.WebClientPath + (file as FileInfoContainer).FilePath.Replace("\\", "/"));
-                           var filepath = new FileInfo(path + (file as FileInfoContainer).FilePath);
+                           var cfile = (file as FileInfoContainer);
+                           string webpath = WebUtility.UrlDecode(SettingsCur.WebClientPath + cfile.FilePath.Replace("\\", "/"));
+                           var filepath = new FileInfo(path + cfile.FilePath);
                            if (!filepath.Directory.Exists)
                                filepath.Directory.Create();
+                           var pathtosave = filepath.FullName;
+                           if (cfile.Name.ToLower() == ExecutionFileName.ToLower())
+                           {
+                               pathtosave = pathtosave.Replace(cfile.Name, $"[NEW]{cfile.Name}");
+                           }
                            using (var wc = new WebClient())
-                               wc.DownloadFile(webpath, filepath.FullName);
+                               wc.DownloadFile(webpath, pathtosave);
                        }
                        catch (Exception exc)
                        {
@@ -225,7 +233,21 @@ namespace RFSTASIS_Launcher
                 var todownload = server.Where(s => tmp.Any(l => s.FilePath == l)).ToList();
                 toupdate.AddRange(todownload);
                 Server.Download(new ConcurrentBag<FileInfoContainer>(toupdate));
+                if (File.Exists($"[NEW]{ExecutionFileName}"))
+                {
+                    //TODO Run EXE Replace program
+                    var id = Process.GetCurrentProcess().Id;
+                    try
+                    {
+                        var args = $"{id} \"{ExecutionFileName}\" \"[NEW]{ExecutionFileName}\"";
+                        Process.Start("Replacer.exe", args);
+                        Environment.Exit(0);
+                    }
+                    catch(Exception exc)
+                    {
 
+                    }
+                }
             }
         }
         public class FileInfoContainer
