@@ -247,6 +247,10 @@ namespace RFSTASIS_Launcher
                     }
                 }
             }
+            public static void RunGame()
+            {
+
+            }
         }
         public class FileInfoContainer
         {
