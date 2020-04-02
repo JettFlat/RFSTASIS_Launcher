@@ -22,8 +22,6 @@ namespace RFSTASIS_Launcher
         static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
         static public void Start()
         {
-            //var files = FileInfoContainer.Read(@"D:\WORK\RFSTASIS_Launcher\RFSTASIS_Launcher\bin\Debug\netcoreapp3.1\serverhash.hs");
-            //Server.Parse();
             GameClient.GetUpdates();
         }
         public class Settings
