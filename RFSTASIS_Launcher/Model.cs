@@ -20,12 +20,15 @@ namespace RFSTASIS_Launcher
         static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
         static public void Start()
         {
-            Server.Parse();
+            //var files = FileInfoContainer.Read(@"D:\WORK\RFSTASIS_Launcher\RFSTASIS_Launcher\bin\Debug\netcoreapp3.1\serverhash.hs");
+            //Server.Parse();
+            GameClient.GetUpdates();
         }
         public class Settings
         {
             public string WebClientPath { get; set; }
             public List<string> FilesToIgnore { get; set; }
+            public List<string> FilesToNotUpdate { get; set; }
             public static Settings Deserialize(string path = "Settings.json")
             {
                 if (File.Exists(path))
@@ -37,8 +40,9 @@ namespace RFSTASIS_Launcher
                         WebClientPath = "http://update1.rfstasis.com/clientpatch/",
                         FilesToIgnore = new List<string> {
                         "MD5 Hash Updater.deps.json","MD5 Hash Updater.dll","MD5 Hash Updater.exe","MD5 Hash Updater.pdb","MD5 Hash Updater.runtimeconfig.dev.json","MD5 Hash Updater.runtimeconfig.json"
-                        ,"Exceptions.txt"
-                    }
+                        ,"Exceptions.txt","NetLog\\rfclient.log","NetLog\\Odin.log","NetLog\\EffectLog.log","NetLog\\Client-Net.log","NetLog\\CEngineLog.log","NetLog\\Critical.Log"
+                    },
+                        FilesToNotUpdate = new List<string> { "R3Engine.ini", "System\\DefaultSet.tmp" }
                     };
                     set.Serialize();
                     return set;
@@ -117,6 +121,37 @@ namespace RFSTASIS_Launcher
                 }
                 File.WriteAllText("FilesLink.txt", JsonConvert.SerializeObject(FilesLink));
             }
+            public static byte[] DownloadHashFile()
+            {
+                try
+                {
+                    using (var wc = new WebClient())
+                        return wc.DownloadData(SettingsCur.WebClientPath + "HashSum.hs");
+                }
+                catch(Exception exc)
+                {
+                    throw new Exception("No access to server", exc);
+                }
+            }
+            public static void Download(ConcurrentBag<FileInfoContainer> Files, string path = ".\\")
+            {
+                Parallel.ForEach(Files, parallelOptions, file =>
+                   {
+                       try
+                       {
+                           string webpath = WebUtility.UrlDecode(SettingsCur.WebClientPath + (file as FileInfoContainer).FilePath.Replace("\\", "/"));
+                           var filepath = new FileInfo(path + (file as FileInfoContainer).FilePath);
+                           if (!filepath.Directory.Exists)
+                               filepath.Directory.Create();
+                           using (var wc = new WebClient())
+                               wc.DownloadFile(webpath, filepath.FullName);
+                       }
+                       catch (Exception exc)
+                       {
+
+                       }
+                   });
+            }
         }
         public class MD5Hash
         {
@@ -178,6 +213,20 @@ namespace RFSTASIS_Launcher
                 });
                 return res;
             }
+            public static void GetUpdates()
+            {
+                var local = GetFilesHash();
+                //var server = FileInfoContainer.Read(@"D:\WORK\RFSTASIS_Launcher\RFSTASIS_Launcher\bin\Debug\netcoreapp3.1\serverhash.hs");
+                var server = FileInfoContainer.Read(Server.DownloadHashFile());
+                List<FileInfoContainer> toupdate = new List<FileInfoContainer>(server.Where(s => local.FirstOrDefault(l => s.FilePath == l.FilePath)?.MD5Hash != s.MD5Hash));
+                var remove = SettingsCur.FilesToIgnore.Concat(SettingsCur.FilesToNotUpdate).Distinct().ToList();
+                toupdate = new List<FileInfoContainer>(toupdate.Where(x => !remove.Any(y => y == x.FilePath)));
+                var tmp = SettingsCur.FilesToNotUpdate.Except(local.Select(y => y.FilePath)).ToList();
+                var todownload = server.Where(s => tmp.Any(l => s.FilePath == l)).ToList();
+                toupdate.AddRange(todownload);
+                Server.Download(new ConcurrentBag<FileInfoContainer>(toupdate));
+
+            }
         }
         public class FileInfoContainer
         {
@@ -200,6 +249,10 @@ namespace RFSTASIS_Launcher
             public static ConcurrentBag<FileInfoContainer> Read(string PathToRead = ".\\HashSum.hs")
             {
                 return JsonConvert.DeserializeObject<ConcurrentBag<FileInfoContainer>>(File.ReadAllText(PathToRead));
+            }
+            public static ConcurrentBag<FileInfoContainer> Read(byte[] array)
+            {
+                return JsonConvert.DeserializeObject<ConcurrentBag<FileInfoContainer>>(Encoding.Default.GetString(array));
             }
         }
     }
