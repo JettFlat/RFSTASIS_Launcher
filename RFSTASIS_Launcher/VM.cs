@@ -8,18 +8,12 @@ namespace RFSTASIS_Launcher
         {
             gameClient.PropertyChanged += (s, e) => { OnPropertyChanged(e.PropertyName); };
         }
-        public string Text => "Flex";
         public bool IsServerOnline => gameClient.IsServerOnline;
-        public string ServerStatus
+        public string ServerStatus => gameClient.ServerStatus;
+
+        public RelayCommand Start => new RelayCommand(o =>
         {
-            get
-            {
-                if (IsServerOnline)
-                    return "Online";
-                else
-                    return "Offline";
-            }
-        }
-        public RelayCommand Start => new RelayCommand(o =>{ gameClient.Start(); });
+            gameClient.Start();
+        });
     }
 }

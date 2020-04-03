@@ -18,6 +18,16 @@ namespace RFSTASIS_Launcher
     {
         NetworkClient networkClient;
         bool _IsServerOnline = false;
+        public string ServerStatus
+        {
+            get
+            {
+                if (IsServerOnline)
+                    return "ONLINE";
+                else
+                    return "OFFLINE";
+            }
+        }
         public bool IsServerOnline
         {
             get => _IsServerOnline;
@@ -25,6 +35,7 @@ namespace RFSTASIS_Launcher
             {
                 _IsServerOnline = value;
                 OnPropertyChanged();
+                OnPropertyChanged("ServerStatus");
             }
         }
         public string Path => Environment.CurrentDirectory;
