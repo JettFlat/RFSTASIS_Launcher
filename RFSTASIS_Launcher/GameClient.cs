@@ -2,6 +2,7 @@
 using MiniLauncher.Network;
 using MiniLauncher.Network.Packets;
 using Newtonsoft.Json;
+using rlgn;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -159,23 +160,27 @@ namespace RFSTASIS_Launcher
         }
         public class ClientSettings
         {
-            public string NickName { get; set; } = "";
-            public string Password { get; set; } = "";
+            public string NickName { get; set; }
+            public string Password { get; set; }
+            public EngineSettings engineSettings { get; set; }
             public static ClientSettings Deserialize(string path = "ClientSettings.json")
             {
                 if (File.Exists(path))
                 {
                     try
                     {
-                        return JsonConvert.DeserializeObject<ClientSettings>(File.ReadAllText(path));
+                        var settings = JsonConvert.DeserializeObject<ClientSettings>(File.ReadAllText(path));
+                        return settings;
                     }
-                    catch (Exception){}
+                    catch (Exception) { }
                 }
                 var set = new ClientSettings
                 {
                     NickName = "",
-                    Password = ""
+                    Password = "",
+                    engineSettings = new EngineSettings(),
                 };
+                set.engineSettings.Read();
                 set.Serialize();
                 return set;
             }
@@ -184,6 +189,10 @@ namespace RFSTASIS_Launcher
                 var tosave = this;
                 tosave.Password = "";
                 File.WriteAllText(path, JsonConvert.SerializeObject(tosave));
+            }
+            public void WriteEngineSettings()
+            {
+                engineSettings.SaveSettings();
             }
         }
     }

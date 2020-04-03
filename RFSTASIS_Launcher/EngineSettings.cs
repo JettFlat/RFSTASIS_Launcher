@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace rlgn
 {
-    class EngineSettings
+    public class EngineSettings
     {
         private string[] cfile;
 
@@ -26,18 +26,22 @@ namespace rlgn
        
         public EngineSettings()
         {
-            try
-            {
-                string currentDirectory = Directory.GetCurrentDirectory();                
-                cfile = File.ReadAllLines("R3Engine.ini");
-                readsettings();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message, "Load Settings: Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            //try
+            //{
+            //    string currentDirectory = Directory.GetCurrentDirectory();                
+            //    cfile = File.ReadAllLines("R3Engine.ini");
+            //    readsettings();
+            //}
+            //catch (Exception e)
+            //{
+            //    MessageBox.Show(e.Message, "Load Settings: Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            //}
         }
-
+        public void Read(string path = "R3Engine.ini")
+        {
+            cfile = File.ReadAllLines(path);
+            readsettings();
+        }
         public string GraphicsAdapter
         {
             get
@@ -46,7 +50,7 @@ namespace rlgn
             }
             set
             {
-                this.ga = value.Replace(' ', '%');
+                this.ga = value?.Replace(' ', '%');
             }
         }
         public string Resolution
@@ -182,57 +186,57 @@ namespace rlgn
         public void SaveSettings()
         {
             string str;
-            
-            for (int i = 0; i < cfile.Length; i++)
+            var sfile = File.ReadAllLines("R3Engine.ini");
+            for (int i = 0; i < sfile.Length; i++)
             {
-                str = cfile[i];
+                str = sfile[i];
                 if (str.StartsWith("ScreenXSize"))
                 {
-                    cfile[i] = "ScreenXSize=" + screenX.ToString();
+                    sfile[i] = "ScreenXSize=" + screenX.ToString();
                 }
                 else if (str.StartsWith("ScreenYSize"))
                 {
-                    cfile[i] = "ScreenYSize=" + screenY.ToString();
+                    sfile[i] = "ScreenYSize=" + screenY.ToString();
                 }
                 else if (str.StartsWith("Gamma"))
                 {
-                    cfile[i] = "Gamma=" + gamma.ToString("0.0", CultureInfo.InvariantCulture);
+                    sfile[i] = "Gamma=" + gamma.ToString("0.0", CultureInfo.InvariantCulture);
                 }
                 else if (str.StartsWith("BboShasi"))
                 {
-                    cfile[i] = "BboShasit=" + glow.ToString();
+                    sfile[i] = "BboShasit=" + glow.ToString();
                 }
                 else if (str.StartsWith("TextureDetail"))
                 {
-                    cfile[i] = "TextureDetail=" + texture.ToString();
+                    sfile[i] = "TextureDetail=" + texture.ToString();
                 }
                 else if (str.StartsWith("DynamicLight"))
                 {
-                    cfile[i] = "DynamicLight=" + light.ToString();
+                    sfile[i] = "DynamicLight=" + light.ToString();
                 }
                 else if (str.StartsWith("ShadowDetail"))
                 {
-                    cfile[i] = "ShadowDetail=" + shadow.ToString();
+                    sfile[i] = "ShadowDetail=" + shadow.ToString();
                 }
                 else if (str.StartsWith("bMouseAccelation"))
                 {
-                    cfile[i] = "bMouseAccelation=" + (mouse ? "TRUE" : "FALSE");
+                    sfile[i] = "bMouseAccelation=" + (mouse ? "TRUE" : "FALSE");
                 }
                 else if (str.StartsWith("bDetailTexture"))
                 {
-                    cfile[i] = "bDetailTexture=" + (texturedetail ? "TRUE" : "FALSE");
+                    sfile[i] = "bDetailTexture=" + (texturedetail ? "TRUE" : "FALSE");
                 }
                 else if (str.StartsWith("bFullScreen"))
                 {
-                    cfile[i] = "bFullScreen=" + (fullscreen ? "TRUE" : "FALSE");
+                    sfile[i] = "bFullScreen=" + (fullscreen ? "TRUE" : "FALSE");
                 }
                 else if (str.StartsWith("Adapter"))
                 {
-                    cfile[i] = "Adapter=" + ga;
+                    sfile[i] = "Adapter=" + ga;
                 }
             }
             File.Delete("R3Engine.ini");
-            File.WriteAllLines("R3Engine.ini", cfile);
+            File.WriteAllLines("R3Engine.ini", sfile);
         }
 
         private void readsettings()

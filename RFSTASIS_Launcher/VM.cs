@@ -10,6 +10,18 @@ namespace RFSTASIS_Launcher
         }
         public bool IsServerOnline => gameClient.IsServerOnline;
         public string ServerStatus => gameClient.ServerStatus;
+        bool _WindowMode = !gameClient.clientSettings.engineSettings.FullScreen;
+        public bool WindowMode
+        {
+            get => _WindowMode;
+            set
+            {
+                _WindowMode = value;
+                gameClient.clientSettings.engineSettings.FullScreen = !_WindowMode;
+                OnPropertyChanged();
+                gameClient.clientSettings.Serialize();
+            }
+        }
 
         public string NickName
         {
@@ -24,6 +36,7 @@ namespace RFSTASIS_Launcher
         public RelayCommand Start => new RelayCommand(o =>
         {
             var passwordBox = o as System.Windows.Controls.PasswordBox;
+            gameClient.clientSettings.WriteEngineSettings();
             gameClient.clientSettings.Password = passwordBox.Password;
             gameClient.Start();
         });
