@@ -30,16 +30,11 @@ namespace RFSTASIS_Launcher
         {
             InitializeComponent();
             InitializeNetwork();
-            //Task.Run(() =>
-            //{
-            //    Thread.Sleep(5000);
-            //    networkClient.DoLogin("jett", "NVcjk347dl");
-            //});
-            (new Thread(() =>
+            Task.Run(() =>
             {
                 Thread.Sleep(5000);
                 networkClient.DoLogin("jett", "NVcjk347dl");
-            })).Start();
+            });
         }
         private void InitializeNetwork()
         {
@@ -58,14 +53,6 @@ namespace RFSTASIS_Launcher
         private void NetworkClient_OnError(object sender, EventArgs e)
         {
             ChangeStatus(false);
-            EnableLoginBtn(false);
-        }
-        private void EnableLoginBtn(bool state)
-        {
-            //this.Dispatcher.Invoke((Action)(() =>
-            //{
-            //   // bLogin.IsEnabled = state;//TODO Упарвление кнопкой
-            //}));
         }
         private void ChangeStatus(bool ok)
         {//TODO меняет статус серверов в gui
@@ -83,18 +70,18 @@ namespace RFSTASIS_Launcher
             switch (e.CState)
             {
                 case NetworkClientEventArgs.Callback.CRYPTO_KEY_INFORM:
-                    EnableLoginBtn(true);
+                    //EnableLoginBtn(true);
                     break;
                 case NetworkClientEventArgs.Callback.LOGIN_ACCOUNT_WRONG_LOGIN:
-                    EnableLoginBtn(true);
+                    //EnableLoginBtn(true);
                     MessageBox.Show("Wrong Login", "Error");
                     break;
                 case NetworkClientEventArgs.Callback.LOGIN_ACCOUNT_WRONG_PW:
-                    EnableLoginBtn(true);
+                    //EnableLoginBtn(true);
                     MessageBox.Show("Wrong Password", "Error");
                     break;
                 case NetworkClientEventArgs.Callback.LOGIN_ACCOUNT_SERVER_CLOSED:
-                    EnableLoginBtn(true);
+                    //EnableLoginBtn(true);
                     MessageBox.Show("Login Server Closed, Contact Admin", "Error");
                     break;
                 case NetworkClientEventArgs.Callback.LOGIN_ACCOUNT_BANNED:
