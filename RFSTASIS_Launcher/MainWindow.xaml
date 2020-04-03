@@ -20,16 +20,19 @@
     </Window.DataContext>
     <Grid>
         <StackPanel>
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" Margin="5 5 5 5">
+                    <TextBlock Text="RF STASIS"/>
+                    <TextBlock Text="CLASSIC RFONLINE REBORN"/>
+                </StackPanel>
+            </DockPanel>
             <materialDesign:Card Padding="32" Margin="16">
                 <Button Content="Download"/>
             </materialDesign:Card>
             <materialDesign:Card Padding="32" Margin="16">
-                <TextBlock Text="{Binding FlagText}"/>
-            </materialDesign:Card>
-            <materialDesign:Card Padding="32" Margin="16">
                 <TextBlock Text="{Binding ServerStatus,UpdateSourceTrigger=PropertyChanged}"/>
             </materialDesign:Card>
-            <Button Command="{Binding TestCommand}"/>
+            <Button Content="Start" Command="{Binding Start}"/>
         </StackPanel>
     </Grid>
 </Window>

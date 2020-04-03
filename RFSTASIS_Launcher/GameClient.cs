@@ -17,33 +17,14 @@ namespace RFSTASIS_Launcher
     public class GameClient :VMBase
     {
         NetworkClient networkClient;
-        string _ServerStatus = "offline";
-        public string ServerStatus
-        {
-            get => _ServerStatus;
-            set
-            {
-                _ServerStatus = value;
-                OnPropertyChanged("ServerStatus");
-            }
-        }
-        //public string ServerStatus
-        //{
-        //    get
-        //    {
-        //        if (IsServerOnline == false)
-        //            return "Offline";
-        //        else
-        //            return "Online";
-        //    }
-        //}
         bool _IsServerOnline = false;
-        bool IsServerOnline
+        public bool IsServerOnline
         {
             get => _IsServerOnline;
             set
             {
                 _IsServerOnline = value;
+                OnPropertyChanged();
             }
         }
         public string Path => Environment.CurrentDirectory;
@@ -105,7 +86,6 @@ namespace RFSTASIS_Launcher
         }
         void NetworkClient_OnConnected(object sender, EventArgs e)
         {
-            ServerStatus = "Online";
             IsServerOnline = true;
             //ChangeStatus(true);
         }
@@ -146,7 +126,6 @@ namespace RFSTASIS_Launcher
         }
         void NetworkClient_OnError(object sender, EventArgs e)
         {
-            ServerStatus = "Offline";
             IsServerOnline = false;
         }
         void RunGame(Default_Set defaultSet)
