@@ -5,7 +5,6 @@ namespace RFSTASIS_Launcher
     {
         public VM() : base()
         {
-            Model.Start();
         }
         public string Text => "Flex";
     }
