@@ -1,6 +1,7 @@
 ﻿using MiniLauncher.Helper;
 using MiniLauncher.Network;
 using MiniLauncher.Network.Packets;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,8 +15,9 @@ using static RFSTASIS_Launcher.Model;
 
 namespace RFSTASIS_Launcher
 {
-    public class GameClient :VMBase
+    public class GameClient : VMBase
     {
+        public ClientSettings clientSettings { get; set; } = ClientSettings.Deserialize();
         NetworkClient networkClient;
         bool _IsServerOnline = false;
         public string ServerStatus
@@ -132,7 +134,7 @@ namespace RFSTASIS_Launcher
         }
         void FillServerList(List<ServerState> _serverList)
         {
-            Task.Run(()=>{ networkClient.SelectWordlRequest(Model.SettingsCur.Servercfg.ServerIndexSelect); });
+            Task.Run(() => { networkClient.SelectWordlRequest(Model.SettingsCur.Servercfg.ServerIndexSelect); });
 
         }
         void NetworkClient_OnError(object sender, EventArgs e)
@@ -152,8 +154,37 @@ namespace RFSTASIS_Launcher
             Task.Run(() =>
             {
                 Thread.Sleep(5000);
-                networkClient.DoLogin("jett", "NVcjk347dl");
+                networkClient.DoLogin(clientSettings.NickName, clientSettings.Password);
             });
+        }
+        public class ClientSettings
+        {
+            public string NickName { get; set; } = "";
+            public string Password { get; set; } = "";
+            public static ClientSettings Deserialize(string path = "ClientSettings.json")
+            {
+                if (File.Exists(path))
+                {
+                    try
+                    {
+                        return JsonConvert.DeserializeObject<ClientSettings>(File.ReadAllText(path));
+                    }
+                    catch (Exception){}
+                }
+                var set = new ClientSettings
+                {
+                    NickName = "",
+                    Password = ""
+                };
+                set.Serialize();
+                return set;
+            }
+            public void Serialize(string path = "ClientSettings.json")
+            {
+                var tosave = this;
+                tosave.Password = "";
+                File.WriteAllText(path, JsonConvert.SerializeObject(tosave));
+            }
         }
     }
 }
