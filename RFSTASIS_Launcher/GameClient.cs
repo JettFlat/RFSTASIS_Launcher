@@ -14,11 +14,40 @@ using static RFSTASIS_Launcher.Model;
 
 namespace RFSTASIS_Launcher
 {
-    public class GameClient
+    public class GameClient :VMBase
     {
-        static NetworkClient networkClient;
-        public static string Path => Environment.CurrentDirectory;
-        public static ConcurrentBag<FileInfoContainer> GetFilesHash()
+        NetworkClient networkClient;
+        string _ServerStatus = "offline";
+        public string ServerStatus
+        {
+            get => _ServerStatus;
+            set
+            {
+                _ServerStatus = value;
+                OnPropertyChanged("ServerStatus");
+            }
+        }
+        //public string ServerStatus
+        //{
+        //    get
+        //    {
+        //        if (IsServerOnline == false)
+        //            return "Offline";
+        //        else
+        //            return "Online";
+        //    }
+        //}
+        bool _IsServerOnline = false;
+        bool IsServerOnline
+        {
+            get => _IsServerOnline;
+            set
+            {
+                _IsServerOnline = value;
+            }
+        }
+        public string Path => Environment.CurrentDirectory;
+        public ConcurrentBag<FileInfoContainer> GetFilesHash()
         {
             ConcurrentBag<FileInfoContainer> res = new ConcurrentBag<FileInfoContainer>();
             var files = Directory.GetFiles(Path, "", SearchOption.AllDirectories);
@@ -32,7 +61,7 @@ namespace RFSTASIS_Launcher
             });
             return res;
         }
-        public static void GetUpdates()
+        public void GetUpdates()
         {
             var local = GetFilesHash();
             var server = FileInfoContainer.Read(Server.DownloadHashFile());
@@ -59,11 +88,11 @@ namespace RFSTASIS_Launcher
                 }
             }
         }
-        public static void Start()
+        public void Start()
         {
             Login();
         }
-        public static void InitializeNetwork()
+        public void InitializeNetwork()
         {
             var serverCfg = Model.SettingsCur.Servercfg;
             string ip = serverCfg.LogginAddress.Split(':')[0];
@@ -74,11 +103,13 @@ namespace RFSTASIS_Launcher
             networkClient.ClientEvents += NetworkClient_ClientEvents;
             Task.Run(() => { networkClient.StartClient(); });
         }
-        static void NetworkClient_OnConnected(object sender, EventArgs e)
+        void NetworkClient_OnConnected(object sender, EventArgs e)
         {
+            ServerStatus = "Online";
+            IsServerOnline = true;
             //ChangeStatus(true);
         }
-        static void NetworkClient_ClientEvents(object sender, NetworkClientEventArgs e)
+        void NetworkClient_ClientEvents(object sender, NetworkClientEventArgs e)
         {
             switch (e.CState)
             {
@@ -108,16 +139,17 @@ namespace RFSTASIS_Launcher
                     break;
             }
         }
-        static void FillServerList(List<ServerState> _serverList)
+        void FillServerList(List<ServerState> _serverList)
         {
             Task.Run(()=>{ networkClient.SelectWordlRequest(Model.SettingsCur.Servercfg.ServerIndexSelect); });
 
         }
-        static void NetworkClient_OnError(object sender, EventArgs e)
+        void NetworkClient_OnError(object sender, EventArgs e)
         {
-          //  ChangeStatus(false);
+            ServerStatus = "Offline";
+            IsServerOnline = false;
         }
-        static void RunGame(Default_Set defaultSet)
+        void RunGame(Default_Set defaultSet)
         {
             defaultSet.nation_code = 3;
             ClientRunHelper.WriteTmp(@"System/DefaultSet.tmp", defaultSet);
@@ -125,7 +157,7 @@ namespace RFSTASIS_Launcher
             networkClient.StopListen();
             Environment.Exit(0);
         }
-        static void Login()
+        void Login()
         {
             Task.Run(() =>
             {

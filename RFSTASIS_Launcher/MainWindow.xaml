@@ -24,8 +24,12 @@
                 <Button Content="Download"/>
             </materialDesign:Card>
             <materialDesign:Card Padding="32" Margin="16">
-                <TextBlock Text="{Binding Text}"/>
+                <TextBlock Text="{Binding FlagText}"/>
             </materialDesign:Card>
+            <materialDesign:Card Padding="32" Margin="16">
+                <TextBlock Text="{Binding ServerStatus,UpdateSourceTrigger=PropertyChanged}"/>
+            </materialDesign:Card>
+            <Button Command="{Binding TestCommand}"/>
         </StackPanel>
     </Grid>
 </Window>

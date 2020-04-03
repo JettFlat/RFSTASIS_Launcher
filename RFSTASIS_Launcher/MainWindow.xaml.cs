@@ -28,8 +28,7 @@ namespace RFSTASIS_Launcher
         public MainWindow()
         {
             InitializeComponent();
-            GameClient.InitializeNetwork();
-            GameClient.Start();
+            Model.GClient.InitializeNetwork();
         }
        
         private void ChangeStatus(bool ok)

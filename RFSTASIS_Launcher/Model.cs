@@ -17,12 +17,13 @@ namespace RFSTASIS_Launcher
 {
     class Model
     {
+        public static GameClient GClient = new GameClient();
         public static string ExecutionFileName { get; } = System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName;
         public static Settings SettingsCur = Settings.Deserialize();
         static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
         static public void Start()
         {
-            GameClient.GetUpdates();
+            GClient.GetUpdates();
         }
         public class Settings
         {
