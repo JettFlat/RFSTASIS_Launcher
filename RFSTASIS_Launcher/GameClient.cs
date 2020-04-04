@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Management;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -218,6 +220,7 @@ namespace RFSTASIS_Launcher
                     try
                     {
                         var settings = JsonConvert.DeserializeObject<ClientSettings>(File.ReadAllText(path));
+                        settings.engineSettings.GraphicsAdapter = GetGPU();
                         return settings;
                     }
                     catch (Exception) { }
@@ -241,6 +244,81 @@ namespace RFSTASIS_Launcher
             public void WriteEngineSettings()
             {
                 engineSettings.SaveSettings();
+            }
+            static string GetGPU()
+            {
+                ManagementObjectSearcher search = new ManagementObjectSearcher("select * from Win32_VideoController");
+                var gpulist = new List<string>();
+                foreach (ManagementObject mo in search.Get())
+                {
+                    gpulist.Add(mo.GetPropertyValue("Name").ToString());
+                }
+                return gpulist.FirstOrDefault();
+            }
+            [DllImport("user32.dll")]
+            static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
+            [StructLayout(LayoutKind.Sequential)]
+            struct DEVMODE
+            {
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+                public string dmDeviceName;
+                public short dmSpecVersion;
+                public short dmDriverVersion;
+                public short dmSize;
+                public short dmDriverExtra;
+                public int dmFields;
+                public int dmPositionX;
+                public int dmPositionY;
+                public int dmDisplayOrientation;
+                public int dmDisplayFixedOutput;
+                public short dmColor;
+                public short dmDuplex;
+                public short dmYResolution;
+                public short dmTTOption;
+                public short dmCollate;
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+                public string dmFormName;
+                public short dmLogPixels;
+                public int dmBitsPerPel;
+                public int dmPelsWidth;
+                public int dmPelsHeight;
+                public int dmDisplayFlags;
+                public int dmDisplayFrequency;
+                public int dmICMMethod;
+                public int dmICMIntent;
+                public int dmMediaType;
+                public int dmDitherType;
+                public int dmReserved1;
+                public int dmReserved2;
+                public int dmPanningWidth;
+                public int dmPanningHeight;
+            }
+            public static void GetResolutions()
+            {
+                try
+                {
+                    const int ENUM_CURRENT_SETTINGS = -1;
+                    DEVMODE devMode = default;
+                    EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode);
+                    var width = devMode.dmPelsWidth;
+                    var height = devMode.dmPelsHeight;
+                    //ManagementObjectSearcher searcher =
+                    //    new ManagementObjectSearcher("root\\CIMV2",
+                    //    "SELECT * FROM Win32_PnPEntity where service=\"monitor\"");
+
+                    //int numberOfMonitors = searcher.Get().Count;
+                    //foreach(var mo in searcher.Get())
+                    //{
+                    //    var propert = mo.Properties;
+                    //}
+
+                }
+                catch (ManagementException e)
+                {
+                }
+
+                //var width =System.Windows.SystemParameters.VirtualScreenWidth;
+                //var height = System.Windows.SystemParameters.VirtualScreenHeight;
             }
         }
     }

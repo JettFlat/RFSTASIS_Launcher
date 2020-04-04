@@ -29,14 +29,15 @@ namespace RFSTASIS_Launcher
         {
             try
             {
-            InitializeComponent();
-            Model.GClient.InitializeNetwork();
+                InitializeComponent();
+                Model.GClient.InitializeNetwork();
+                GameClient.ClientSettings.GetResolutions(); 
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 exc.Write();
                 exc.ShowMessage();
             }
-        }   
+        }
     }
 }

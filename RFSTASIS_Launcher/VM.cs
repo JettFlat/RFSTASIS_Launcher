@@ -19,6 +19,16 @@ namespace RFSTASIS_Launcher
         }
         public bool IsServerOnline => gameClient.IsServerOnline;
         public string ServerStatus => gameClient.ServerStatus;
+        public GameClient.ClientSettings clientSettings
+        {
+            get => gameClient.clientSettings;
+            set
+            {
+                clientSettings = value;
+                gameClient.clientSettings = clientSettings;
+                OnPropertyChanged();
+            }
+        }
         public bool IsResiveNow => !gameClient.IsResiveNow;
         bool _WindowMode = !gameClient.clientSettings.engineSettings.FullScreen;
         public bool WindowMode

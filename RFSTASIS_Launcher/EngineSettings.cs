@@ -26,16 +26,6 @@ namespace rlgn
        
         public EngineSettings()
         {
-            //try
-            //{
-            //    string currentDirectory = Directory.GetCurrentDirectory();                
-            //    cfile = File.ReadAllLines("R3Engine.ini");
-            //    readsettings();
-            //}
-            //catch (Exception e)
-            //{
-            //    MessageBox.Show(e.Message, "Load Settings: Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            //}
         }
         public void Read(string path = "R3Engine.ini")
         {
@@ -50,7 +40,7 @@ namespace rlgn
             }
             set
             {
-                this.ga = value?.Replace(' ', '%');
+                this.ga = value;
             }
         }
         public string Resolution

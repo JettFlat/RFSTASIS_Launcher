@@ -30,7 +30,7 @@
         </DockPanel>
         <DockPanel>
             <StackPanel DockPanel.Dock="Right">
-                <materialDesign:Card Padding="10" Margin="16" Visibility="Visible">
+                <materialDesign:Card Padding="10" Margin="16" Visibility="Collapsed">
                     <StackPanel>
                         <TextBlock Text="LOGIN DETAILS"/>
                         <TextBox Text="{Binding NickName}"/>
@@ -53,12 +53,12 @@
                         </WrapPanel>
                     </StackPanel>
                 </materialDesign:Card>
-                <materialDesign:Card Padding="10" Margin="16" Visibility="Collapsed">
+                <materialDesign:Card Padding="10" Margin="16" Visibility="Visible">
                     <StackPanel>
                         <TextBlock Text="Settings"/>
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Left" Text="Graphics Adapter"/>
-                            <ComboBox DockPanel.Dock="Right"/>
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding clientSettings.engineSettings.GraphicsAdapter}"/>
                         </DockPanel>
                     </StackPanel>
                 </materialDesign:Card>
