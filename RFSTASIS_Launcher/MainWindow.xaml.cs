@@ -27,18 +27,16 @@ namespace RFSTASIS_Launcher
     {
         public MainWindow()
         {
+            try
+            {
             InitializeComponent();
             Model.GClient.InitializeNetwork();
-        }
-       
-        private void ChangeStatus(bool ok)
-        {//TODO меняет статус серверов в gui
-            //this.Dispatcher.Invoke((Action)(() =>
-            //{
-            //    //lbStatus.Content = ok ? "Online" : "Offline";
-            //}))
-        }
-       
-       
+            }
+            catch(Exception exc)
+            {
+                exc.Write();
+                exc.ShowMessage();
+            }
+        }   
     }
 }

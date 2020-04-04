@@ -41,6 +41,26 @@ namespace RFSTASIS_Launcher
                 OnPropertyChanged("ServerStatus");
             }
         }
+        bool _IsResiveNow = false;
+        public bool IsResiveNow
+        {
+            get => _IsResiveNow;
+            set
+            {
+                _IsResiveNow = value;
+                OnPropertyChanged();
+            }
+        }
+        string _ServerMessage;
+        public string ServerMessage
+        {
+            get => _ServerMessage;
+            set
+            {
+                _ServerMessage = value;
+                OnPropertyChanged();
+            }
+        }
         public string Path => Environment.CurrentDirectory;
         public ConcurrentBag<FileInfoContainer> GetFilesHash()
         {
@@ -48,11 +68,18 @@ namespace RFSTASIS_Launcher
             var files = Directory.GetFiles(Path, "", SearchOption.AllDirectories);
             Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 1 }, file =>
             {
-                var fi = new FileInfo(file);
-                var item = new FileInfoContainer { Name = fi.Name, FilePath = fi.FullName, DateEdit = fi.LastWriteTime };
-                using (var str = File.OpenRead(fi.FullName))
-                    item.MD5Hash = MD5Hash.GetHash(str);
-                res.Add(item);
+                try
+                {
+                    var fi = new FileInfo(file);
+                    var item = new FileInfoContainer { Name = fi.Name, FilePath = fi.FullName, DateEdit = fi.LastWriteTime };
+                    using (var str = File.OpenRead(fi.FullName))
+                        item.MD5Hash = MD5Hash.GetHash(str);
+                    res.Add(item);
+                }
+                catch (Exception exc)
+                {
+                    new Exception($"Can't get hash of file{file}", exc).Write();
+                }
             });
             return res;
         }
@@ -62,14 +89,13 @@ namespace RFSTASIS_Launcher
             var server = FileInfoContainer.Read(Server.DownloadHashFile());
             List<FileInfoContainer> toupdate = new List<FileInfoContainer>(server.Where(s => local.FirstOrDefault(l => s.FilePath == l.FilePath)?.MD5Hash != s.MD5Hash));
             var remove = SettingsCur.FilesToIgnore.Concat(SettingsCur.FilesToNotUpdate).Distinct().ToList();
-            toupdate = new List<FileInfoContainer>(toupdate.Where(x => !remove.Any(y => y == x.FilePath)));
+            toupdate = toupdate.Where(x => !remove.Any(y => y == x.FilePath)).ToList();
             var tmp = SettingsCur.FilesToNotUpdate.Except(local.Select(y => y.FilePath)).ToList();
             var todownload = server.Where(s => tmp.Any(l => s.FilePath == l)).ToList();
             toupdate.AddRange(todownload);
             Server.Download(new ConcurrentBag<FileInfoContainer>(toupdate));
             if (File.Exists($"[NEW]{ExecutionFileName}"))
             {
-                //TODO Run EXE Replace program
                 var id = Process.GetCurrentProcess().Id;
                 try
                 {
@@ -79,19 +105,29 @@ namespace RFSTASIS_Launcher
                 }
                 catch (Exception exc)
                 {
-
+                    new Exception("Can't start Replacer.exe", exc).Write();
                 }
             }
         }
         public void Start()
         {
+            IsResiveNow = true;
             Login();
         }
         public void InitializeNetwork()
         {
             var serverCfg = Model.SettingsCur.Servercfg;
-            string ip = serverCfg.LogginAddress.Split(':')[0];
-            int port = int.Parse(serverCfg.LogginAddress.Split(':')[1]);
+            string ip = "";
+            int port;
+            try
+            {
+                ip = serverCfg.LogginAddress.Split(':')[0];
+                port = int.Parse(serverCfg.LogginAddress.Split(':')[1]);
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("Incorrect IP and Port", exc);
+            }
             networkClient = new NetworkClient(ip, port);
             networkClient.OnError += NetworkClient_OnError;
             networkClient.OnConnected += NetworkClient_OnConnected;
@@ -101,34 +137,36 @@ namespace RFSTASIS_Launcher
         void NetworkClient_OnConnected(object sender, EventArgs e)
         {
             IsServerOnline = true;
-            //ChangeStatus(true);
         }
         void NetworkClient_ClientEvents(object sender, NetworkClientEventArgs e)
         {
             switch (e.CState)
             {
                 case NetworkClientEventArgs.Callback.CRYPTO_KEY_INFORM:
-                    //EnableLoginBtn(true);
+                    IsResiveNow = false;
                     break;
                 case NetworkClientEventArgs.Callback.LOGIN_ACCOUNT_WRONG_LOGIN:
-                    //EnableLoginBtn(true);
-                    //MessageBox.Show("Wrong Login", "Error");
+                    IsResiveNow = false;
+                    ServerMessage = "Wrong Login";
                     break;
                 case NetworkClientEventArgs.Callback.LOGIN_ACCOUNT_WRONG_PW:
-                    //EnableLoginBtn(true);
-                    //MessageBox.Show("Wrong Password", "Error");
+                    IsResiveNow = false;
+                    ServerMessage = "Wrong Password";
                     break;
                 case NetworkClientEventArgs.Callback.LOGIN_ACCOUNT_SERVER_CLOSED:
-                    //EnableLoginBtn(true);
-                    //MessageBox.Show("Login Server Closed, Contact Admin", "Error");
+                    IsResiveNow = false;
+                    ServerMessage = "Login Server Closed, Contact Admin";
                     break;
                 case NetworkClientEventArgs.Callback.LOGIN_ACCOUNT_BANNED:
-                    //MessageBox.Show("Account Blocked", "Error");
+                    IsResiveNow = false;
+                    ServerMessage = "Account Blocked";
                     break;
                 case NetworkClientEventArgs.Callback.SERVER_LIST_INFORM:
+                    IsResiveNow = true;
                     FillServerList(e.Servers);
                     break;
                 case NetworkClientEventArgs.Callback.SERVER_SESSION_RESULT:
+                    IsResiveNow = true;
                     RunGame(e.DefaultSet);
                     break;
             }
@@ -136,7 +174,6 @@ namespace RFSTASIS_Launcher
         void FillServerList(List<ServerState> _serverList)
         {
             Task.Run(() => { networkClient.SelectWordlRequest(Model.SettingsCur.Servercfg.ServerIndexSelect); });
-
         }
         void NetworkClient_OnError(object sender, EventArgs e)
         {
@@ -144,11 +181,22 @@ namespace RFSTASIS_Launcher
         }
         void RunGame(Default_Set defaultSet)
         {
-            defaultSet.nation_code = 3;
-            ClientRunHelper.WriteTmp(@"System/DefaultSet.tmp", defaultSet);
-            ClientRunHelper.RunClient(@"RF_Online.bin");
-            networkClient.StopListen();
-            Environment.Exit(0);
+            try
+            {
+                defaultSet.nation_code = 3;
+                ClientRunHelper.WriteTmp(@"System/DefaultSet.tmp", defaultSet);
+                ClientRunHelper.RunClient(@"RF_Online.bin");
+                networkClient.StopListen();
+            }
+            catch (Exception exc)
+            {
+                exc.Write();
+                exc.ShowMessage();
+            }
+            finally
+            {
+                Environment.Exit(0);
+            }
         }
         void Login()
         {

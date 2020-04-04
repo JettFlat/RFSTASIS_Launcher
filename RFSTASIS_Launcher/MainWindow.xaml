@@ -41,7 +41,7 @@
                                     <TextBlock VerticalAlignment="Center" Text="WINDOW MODE"/>
                                     <CheckBox Margin="5 5 5 5" IsChecked="{Binding WindowMode}"/>
                                 </WrapPanel>
-                                <Button Margin="0 5 0 0" Content="LOGIN" Command="{Binding Start}" CommandParameter="{Binding ElementName=PasswordBoxe}"/>
+                                <Button Margin="0 5 0 0" IsEnabled="{Binding IsResiveNow}" Content="LOGIN" Command="{Binding Start}" CommandParameter="{Binding ElementName=PasswordBoxe}"/>
                             </StackPanel>
                             <StackPanel Margin="5 0 0 0">
                                 <WrapPanel>

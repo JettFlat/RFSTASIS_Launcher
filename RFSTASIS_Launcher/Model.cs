@@ -34,35 +34,34 @@ namespace RFSTASIS_Launcher
             public static Settings Deserialize(string path = "Settings.json")
             {
                 if (File.Exists(path))
-                    return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(path));
-                else
                 {
-                    var set = new Settings
-                    {
-                        WebClientPath = "http://update1.rfstasis.com/clientpatch/",
-                        FilesToIgnore = new List<string> {
+                    var cset = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(path));
+                    if (cset.FilesToIgnore != null && cset.FilesToNotUpdate != null && cset.WebClientPath != null && cset.Servercfg.IsCorrect)
+                        return cset;
+                }
+                var set = new Settings
+                {
+                    WebClientPath = "http://update1.rfstasis.com/clientpatch/",
+                    FilesToIgnore = new List<string> {
                         "MD5 Hash Updater.deps.json","MD5 Hash Updater.dll","MD5 Hash Updater.exe","MD5 Hash Updater.pdb","MD5 Hash Updater.runtimeconfig.dev.json","MD5 Hash Updater.runtimeconfig.json"
                         ,"Exceptions.txt","NetLog\\rfclient.log","NetLog\\Odin.log","NetLog\\EffectLog.log","NetLog\\Client-Net.log","NetLog\\CEngineLog.log","NetLog\\Critical.Log"
                     },
-                        FilesToNotUpdate = new List<string> { "R3Engine.ini", "System\\DefaultSet.tmp" },
-                        Servercfg = new ServerSetting
-                        {
-                            LogginAddress = "64.31.6.86:10001",
-                            OverrideServerAddress = false,
-                            OverrideServerSelection = true,
-                            ServerAddress = "64.31.6.86:27780",
-                            ServerIndexSelect = 0
-                        }
-                    };
-                    set.Serialize();
-                    return set;
-                }
+                    FilesToNotUpdate = new List<string> { "R3Engine.ini", "System\\DefaultSet.tmp" },
+                    Servercfg = new ServerSetting
+                    {
+                        LogginAddress = "64.31.6.86:10001",
+                        OverrideServerAddress = false,
+                        OverrideServerSelection = true,
+                        ServerAddress = "64.31.6.86:27780",
+                        ServerIndexSelect = 0
+                    }
+                };
+                set.Serialize();
+                return set;
             }
             public void Serialize(string path = "Settings.json")
             {
-
                 File.WriteAllText(path, JsonConvert.SerializeObject(this));
-
             }
         }
 
@@ -147,9 +146,9 @@ namespace RFSTASIS_Launcher
             {
                 Parallel.ForEach(Files, parallelOptions, file =>
                    {
+                       var cfile = (file as FileInfoContainer);
                        try
                        {
-                           var cfile = (file as FileInfoContainer);
                            string webpath = WebUtility.UrlDecode(SettingsCur.WebClientPath + cfile.FilePath.Replace("\\", "/"));
                            var filepath = new FileInfo(path + cfile.FilePath);
                            if (!filepath.Directory.Exists)
@@ -164,7 +163,7 @@ namespace RFSTASIS_Launcher
                        }
                        catch (Exception exc)
                        {
-
+                           new Exception($"Can't Download file {cfile.Name}", exc).Write();
                        }
                    });
             }

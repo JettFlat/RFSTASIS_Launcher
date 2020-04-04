@@ -30,6 +30,16 @@ namespace MiniLauncher.Data
         public bool OverrideServerAddress { get; set; }
         public bool OverrideServerSelection { get; set; }
         public int ServerIndexSelect { get; set; }
+        public bool IsCorrect
+        {
+            get
+            {
+                if (LogginAddress != null && ServerAddress != null)
+                    return true;
+                else
+                    return false;
+            }
+        }
     }
     public class NationalSetting
     {

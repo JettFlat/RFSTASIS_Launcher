@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Windows;
+
 namespace RFSTASIS_Launcher
 {
     public class VM : VMBase
@@ -6,10 +8,18 @@ namespace RFSTASIS_Launcher
         static readonly GameClient gameClient = Model.GClient;
         public VM() : base()
         {
-            gameClient.PropertyChanged += (s, e) => { OnPropertyChanged(e.PropertyName); };
+            gameClient.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == "ServerMessage")
+                {
+                    MessageBox.Show(gameClient.ServerMessage, "Error");
+                }
+                OnPropertyChanged(e.PropertyName);
+            };
         }
         public bool IsServerOnline => gameClient.IsServerOnline;
         public string ServerStatus => gameClient.ServerStatus;
+        public bool IsResiveNow => !gameClient.IsResiveNow;
         bool _WindowMode = !gameClient.clientSettings.engineSettings.FullScreen;
         public bool WindowMode
         {
