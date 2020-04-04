@@ -21,6 +21,9 @@
     <Window.DataContext>
         <local:VM/>
     </Window.DataContext>
+    <Window.Resources>
+
+    </Window.Resources>
     <StackPanel>
         <DockPanel>
             <StackPanel DockPanel.Dock="Left" Margin="5 5 5 5">
@@ -54,36 +57,66 @@
                     </StackPanel>
                 </materialDesign:Card>
                 <materialDesign:Card Padding="10" Margin="16" Visibility="{Binding IsSettingsVisible}">
-                    <StackPanel>
-                        <TextBlock Text="Settings"/>
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Left" Text="Graphics Adapter"/>
-                            <TextBlock DockPanel.Dock="Right" Text="{Binding clientSettings.engineSettings.GraphicsAdapter}"/>
-                        </DockPanel>
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Left" Text="Resolution"/>
-                            <ComboBox ItemsSource="{Binding Resolutions}" SelectedItem="{Binding SelectedResolution}"/>
-                        </DockPanel>
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Left" Text="Texture Detail"/>
-                            <ComboBox ItemsSource="{Binding Quality}" SelectedItem="{Binding SelectedTexture}"/>
-                        </DockPanel>
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Left" Text="Dynamic Light"/>
-                            <ComboBox ItemsSource="{Binding Quality}" SelectedItem="{Binding SelectedDLight}"/>
-                        </DockPanel>
-                        <Grid Margin="0 5 0 0">
-                            <Button Margin="0 0 5 0" Grid.Column="0" HorizontalAlignment="Stretch" Content="Save" Command="{Binding SaveSettings}"/>
-                            <Button Margin="5 0 0 0" Grid.Column="1" HorizontalAlignment="Stretch" Content="Cancel" Command="{Binding OpenLogin}"/>
-                            <Grid.RowDefinitions>
-                                <RowDefinition></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                        </Grid>
-                    </StackPanel>
+                    <Grid Grid.IsSharedSizeScope="True">
+                        <Grid.Resources>
+                            <!--<Style x:Key="MaterialDesignRaisedButton" BasedOn="{StaticResource MaterialDesignRaisedButton}" TargetType="{x:Type Button}">
+                                <Setter Property="Margin" Value="5" />
+                            </Style>-->
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Setter Property="Margin" Value="3 5 3 0"/>
+                            </Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignCaptionTextBlock}">
+                                <Setter Property="Margin" Value="1.5"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                <Setter Property="Margin" Value="1.5"/>
+                                <!--<Setter Property="HorizontalAlignment" Value="Stretch"/>-->
+                            </Style>
+                            <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                                <Setter Property="Margin" Value="1.5 10 1.5 1.5"/>
+                                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </Grid.Resources>
+                        <TextBlock Text="Settings" Grid.Row="0" Grid.Column="0"/>
+                        <TextBlock Text="Graphics Adapter"  Grid.Row="1" Grid.Column="0"/>
+                        <TextBlock  Text="{Binding clientSettings.engineSettings.GraphicsAdapter}" Grid.Row="1" Grid.Column="1"/>
+                        <TextBlock Text="Resolution"  Grid.Row="2" Grid.Column="0"/>
+                        <ComboBox ItemsSource="{Binding Resolutions}" SelectedItem="{Binding SelectedResolution}" Grid.Row="2" Grid.Column="1"/>
+                        <TextBlock  Text="Texture Detail" Grid.Row="3" Grid.Column="0"/>
+                        <ComboBox ItemsSource="{Binding Quality}" SelectedItem="{Binding SelectedTexture}"  Grid.Row="3" Grid.Column="1"/>
+                        <TextBlock Text="Dynamic Light" Grid.Row="4" Grid.Column="0" />
+                        <ComboBox ItemsSource="{Binding Quality}" SelectedItem="{Binding SelectedDLight}" Grid.Row="4" Grid.Column="1"/>
+                        <TextBlock Text="Glow Effect" Grid.Row="5" Grid.Column="0" />
+                        <ComboBox ItemsSource="{Binding GlowQuality}" SelectedItem="{Binding SelectedGEffect}" Grid.Row="5" Grid.Column="1"/>
+                        <TextBlock Text="Shadow" Grid.Row="6" Grid.Column="0" />
+                        <ComboBox ItemsSource="{Binding Quality}" SelectedItem="{Binding SelectedShadow}" Grid.Row="6" Grid.Column="1"/>
+                        <TextBlock Text="Gamma" Grid.Row="7" Grid.Column="0" />
+                        <ComboBox ItemsSource="{Binding Gammalvls}" SelectedItem="{Binding SelectedGamma}" Grid.Row="7" Grid.Column="1"/>
+                        <CheckBox Grid.Row="8" Grid.Column="1" Content="Detailed Textures" IsChecked="{Binding IsDTextures}"/>
+                        <CheckBox Grid.Row="9" Grid.Column="1" Content="Mouse Acceleration" IsChecked="{Binding IsMAcceleration}"/>
+
+                        <Button HorizontalAlignment="Stretch" Content="Save" Command="{Binding SaveSettings}"
+                                 Grid.Row="10" Grid.Column="0" Width="{Binding ElementName=Cancel,Path=Width}"/>
+                        <Button Grid.Row="10" Name="Cancel" Grid.Column="1" HorizontalAlignment="Stretch" Content="Back" Command="{Binding OpenLogin}"/>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="A" />
+                            <ColumnDefinition SharedSizeGroup="A" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
                 </materialDesign:Card>
             </StackPanel>
             <TextBlock DockPanel.Dock="Left"/>
@@ -94,12 +127,15 @@
                     <TextBlock Text="{Binding ServerStatus,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     <RadioButton IsEnabled="False" IsChecked="{Binding IsServerOnline,Mode=OneWay}"/>
                 </WrapPanel>
-                <TextBlock Text="Version: 1.27" Foreground="Gray"/>
+                <!--<TextBlock Text="Version: 1.27" Foreground="Gray"/>-->
             </StackPanel>
             <StackPanel>
                 <DockPanel>
-                    <ProgressBar DockPanel.Dock="Left" Minimum="0" Maximum="100" Value="50" Width="150" Height="10"/>
-                    <TextBlock DockPanel.Dock="Right" Margin="5 0 0 0" Foreground="Gray" Text="50%"/>
+                    <ProgressBar Name="Progress" DockPanel.Dock="Left" Minimum="0" Maximum="100" Value="50" Width="150" Height="10"/>
+                    <WrapPanel DockPanel.Dock="Right">
+                        <TextBlock  Margin="5 0 0 0" Foreground="Gray" Text="{Binding ElementName=Progress, Path=Value}"/>
+                        <TextBlock Text="%" Foreground="Gray"/>
+                    </WrapPanel>
                 </DockPanel>
                 <TextBlock Text="Filename" FontSize="10" Foreground="Gray" DockPanel.Dock="Bottom"/>
             </StackPanel>

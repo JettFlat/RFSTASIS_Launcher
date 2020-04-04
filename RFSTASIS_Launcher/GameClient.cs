@@ -88,14 +88,14 @@ namespace RFSTASIS_Launcher
         public void GetUpdates()
         {
             var local = GetFilesHash();
-            var server = FileInfoContainer.Read(Server.DownloadHashFile());
+            var server = FileInfoContainer.Read(Servak.DownloadHashFile());
             List<FileInfoContainer> toupdate = new List<FileInfoContainer>(server.Where(s => local.FirstOrDefault(l => s.FilePath == l.FilePath)?.MD5Hash != s.MD5Hash));
             var remove = SettingsCur.FilesToIgnore.Concat(SettingsCur.FilesToNotUpdate).Distinct().ToList();
             toupdate = toupdate.Where(x => !remove.Any(y => y == x.FilePath)).ToList();
             var tmp = SettingsCur.FilesToNotUpdate.Except(local.Select(y => y.FilePath)).ToList();
             var todownload = server.Where(s => tmp.Any(l => s.FilePath == l)).ToList();
             toupdate.AddRange(todownload);
-            Server.Download(new ConcurrentBag<FileInfoContainer>(toupdate));
+            Servak.Download(new ConcurrentBag<FileInfoContainer>(toupdate));
             if (File.Exists($"[NEW]{ExecutionFileName}"))
             {
                 var id = Process.GetCurrentProcess().Id;

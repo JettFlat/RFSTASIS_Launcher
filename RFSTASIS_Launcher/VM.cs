@@ -54,6 +54,7 @@ namespace RFSTASIS_Launcher
             }
         }
         public List<string> Quality { get; } = new List<string> { "Very High", "High", "Medium", "Low" };
+        public List<string> GlowQuality { get; } = new List<string> { "High", "Medium", "Low" };
         string _SelectedTexture = GetTextSettings(gameClient.clientSettings.engineSettings.TextureDetail);
         public string SelectedTexture
         {
@@ -79,7 +80,68 @@ namespace RFSTASIS_Launcher
                 gameClient.clientSettings.Serialize();
             }
         }
-
+        string _SelectedGEffect = GetTextSettings(gameClient.clientSettings.engineSettings.GlowEffect);
+        public string SelectedGEffect
+        {
+            get => _SelectedGEffect;
+            set
+            {
+                _SelectedGEffect = value;
+                OnPropertyChanged();
+                gameClient.clientSettings.engineSettings.GlowEffect = SetTextSettings(_SelectedGEffect);
+                gameClient.clientSettings.Serialize();
+            }
+        }
+        string _SelectedShadow = GetTextSettings(gameClient.clientSettings.engineSettings.ShadowDetail);
+        public string SelectedShadow
+        {
+            get => _SelectedShadow;
+            set
+            {
+                _SelectedShadow = value;
+                OnPropertyChanged();
+                gameClient.clientSettings.engineSettings.ShadowDetail = SetTextSettings(_SelectedShadow);
+                gameClient.clientSettings.Serialize();
+            }
+        }
+        string _SelectedGamma = gameClient.clientSettings.engineSettings.Gamma.ToString().Replace(',','.');
+        public string SelectedGamma
+        {
+            get => _SelectedGamma;
+            set
+            {
+                _SelectedGamma = value;
+                OnPropertyChanged();
+                var gamma = Decimal.Parse(_SelectedGamma.Replace('.',','));
+                gameClient.clientSettings.engineSettings.Gamma = gamma;
+                gameClient.clientSettings.Serialize();
+            }
+        }
+        public List<string> Gammalvls { get; } = new List<string> { "0.8", "1.0", "1.2", "1.4", "1.6", "1.8" };
+        bool _IsDTextures = gameClient.clientSettings.engineSettings.DetailedTextures;
+        public bool IsDTextures
+        {
+            get => _IsDTextures;
+            set
+            {
+                _IsDTextures = value;
+                OnPropertyChanged();
+                gameClient.clientSettings.engineSettings.DetailedTextures= _IsDTextures;
+                gameClient.clientSettings.Serialize();
+            }
+        }
+        bool _IsMAcceleration = gameClient.clientSettings.engineSettings.MouseAcceleration;
+        public bool IsMAcceleration
+        {
+            get => _IsMAcceleration;
+            set
+            {
+                _IsMAcceleration = value;
+                OnPropertyChanged();
+                gameClient.clientSettings.engineSettings.MouseAcceleration = _IsMAcceleration;
+                gameClient.clientSettings.Serialize();
+            }
+        }
 
         public GameClient.ClientSettings clientSettings
         {
@@ -138,6 +200,7 @@ namespace RFSTASIS_Launcher
         });
         public RelayCommand SaveSettings => new RelayCommand(o =>
         {
+            gameClient.clientSettings.Serialize();
             gameClient.clientSettings.WriteEngineSettings();
         });
         static string GetTextSettings(int i)
@@ -160,7 +223,7 @@ namespace RFSTASIS_Launcher
                 return 2;
             if (quality == "Medium")
                 return 1;
-            if (quality== "Low")
+            if (quality == "Low")
                 return 0;
             return 0;
         }

@@ -20,7 +20,8 @@ namespace RFSTASIS_Launcher
         public static GameClient GClient = new GameClient();
         public static string ExecutionFileName { get; } = System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName;
         public static Settings SettingsCur = Settings.Deserialize();
-        static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
+        public static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
+        public static Server Servak = new Server();
         static public void Start()
         {
             GClient.GetUpdates();
@@ -65,109 +66,6 @@ namespace RFSTASIS_Launcher
             }
         }
 
-        public class Server
-        {
-            static BlockingCollection<string> Paths { get; set; } = new BlockingCollection<string> { SettingsCur.WebClientPath };
-            static BlockingCollection<string> FilesLink { get; set; } = new BlockingCollection<string>();
-            public static Stream GetStream(string Url)
-            {
-                HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(Url);
-                HttpWebResponse Response = (HttpWebResponse)Request.GetResponse();
-                var str = Response.GetResponseStream();
-                return str;
-            }
-            public static async Task<string> DownloadPage(string url)
-            {
-                using (var client = new HttpClient())
-                {
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var code = response.StatusCode;
-                        if (code == HttpStatusCode.OK)
-                        {
-                            string responseBody = await response.Content.ReadAsStringAsync();
-                            return responseBody;
-                        }
-                    }
-                }
-                return null;
-            }
-            public static void Parse()
-            {
-                while (Paths.Count > 0)
-                {
-                    string url = Paths.Take();
-                    try
-                    {
-                        var page = new WebClient().DownloadString(url);
-                        var config = Configuration.Default;
-                        var context = BrowsingContext.New(config);
-                        var document = context.OpenAsync(req => req.Content(page)).Result;
-                        var list = document.QuerySelectorAll("a").ToList();
-                        list.RemoveRange(0, 5);
-                        Parallel.ForEach(list, parallelOptions, o =>
-                        {
-                            var text = (o as AngleSharp.Dom.IElement)?.Attributes[0]?.Value;
-                            var textdecoded = WebUtility.UrlDecode(text);
-                            var cpath = url + text;
-                            if (SettingsCur.FilesToIgnore.Any(x => textdecoded.ToLower().Contains(x.ToLower())))
-                                return;
-                            if (text.Contains('/'))
-                            {
-                                Paths.Add(cpath);
-                            }
-                            else
-                            {
-                                FilesLink.Add(cpath);
-                            }
-                        });
-                    }
-                    catch (Exception exc)
-                    {
-
-                    }
-                }
-                File.WriteAllText("FilesLink.txt", JsonConvert.SerializeObject(FilesLink));
-            }
-            public static byte[] DownloadHashFile()
-            {
-                try
-                {
-                    using (var wc = new WebClient())
-                        return wc.DownloadData(SettingsCur.WebClientPath + "HashSum.hs");
-                }
-                catch (Exception exc)
-                {
-                    throw new Exception("No access to server", exc);
-                }
-            }
-            public static void Download(ConcurrentBag<FileInfoContainer> Files, string path = ".\\")
-            {
-                Parallel.ForEach(Files, parallelOptions, file =>
-                   {
-                       var cfile = (file as FileInfoContainer);
-                       try
-                       {
-                           string webpath = WebUtility.UrlDecode(SettingsCur.WebClientPath + cfile.FilePath.Replace("\\", "/"));
-                           var filepath = new FileInfo(path + cfile.FilePath);
-                           if (!filepath.Directory.Exists)
-                               filepath.Directory.Create();
-                           var pathtosave = filepath.FullName;
-                           if (cfile.Name.ToLower() == ExecutionFileName.ToLower())
-                           {
-                               pathtosave = pathtosave.Replace(cfile.Name, $"[NEW]{cfile.Name}");
-                           }
-                           using (var wc = new WebClient())
-                               wc.DownloadFile(webpath, pathtosave);
-                       }
-                       catch (Exception exc)
-                       {
-                           new Exception($"Can't Download file {cfile.Name}", exc).Write();
-                       }
-                   });
-            }
-        }
         public class MD5Hash
         {
             public static string GetHash(Stream file)
@@ -210,6 +108,146 @@ namespace RFSTASIS_Launcher
                         file2.Close();
                 }
             }
+        }
+    }
+    public class Server : VMBase
+    {
+        BlockingCollection<string> Paths { get; set; } = new BlockingCollection<string> { Model.SettingsCur.WebClientPath };
+        BlockingCollection<string> FilesLink { get; set; } = new BlockingCollection<string>();
+        int _FilesToDownloadCount = 0;
+        public int FilesToDownloadCount {
+            get => _FilesToDownloadCount;
+            set
+            {
+                _FilesToDownloadCount = value;
+                OnPropertyChanged();
+            }
+        }
+        int _DownloadedFiles = 0;
+        public int DownloadedFiles
+        {
+            get => _DownloadedFiles;
+            set
+            {
+                _DownloadedFiles = value;
+                OnPropertyChanged();
+            }
+        }
+        string _DownloadedFileName ="";
+        public string DownloadedFileName
+        {
+            get => _DownloadedFileName;
+            set
+            {
+                _DownloadedFileName = value;
+                OnPropertyChanged();
+            }
+        }
+        public Stream GetStream(string Url)
+        {
+            HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(Url);
+            HttpWebResponse Response = (HttpWebResponse)Request.GetResponse();
+            var str = Response.GetResponseStream();
+            return str;
+        }
+        public async Task<string> DownloadPage(string url)
+        {
+            using (var client = new HttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var code = response.StatusCode;
+                    if (code == HttpStatusCode.OK)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        return responseBody;
+                    }
+                }
+            }
+            return null;
+        }
+        public void Parse()
+        {
+            while (Paths.Count > 0)
+            {
+                string url = Paths.Take();
+                try
+                {
+                    var page = new WebClient().DownloadString(url);
+                    var config = Configuration.Default;
+                    var context = BrowsingContext.New(config);
+                    var document = context.OpenAsync(req => req.Content(page)).Result;
+                    var list = document.QuerySelectorAll("a").ToList();
+                    list.RemoveRange(0, 5);
+                    Parallel.ForEach(list, Model.parallelOptions, o =>
+                    {
+                        var text = (o as AngleSharp.Dom.IElement)?.Attributes[0]?.Value;
+                        var textdecoded = WebUtility.UrlDecode(text);
+                        var cpath = url + text;
+                        if (Model.SettingsCur.FilesToIgnore.Any(x => textdecoded.ToLower().Contains(x.ToLower())))
+                            return;
+                        if (text.Contains('/'))
+                        {
+                            Paths.Add(cpath);
+                        }
+                        else
+                        {
+                            FilesLink.Add(cpath);
+                        }
+                    });
+                }
+                catch (Exception exc)
+                {
+
+                }
+            }
+            File.WriteAllText("FilesLink.txt", JsonConvert.SerializeObject(FilesLink));
+        }
+        public byte[] DownloadHashFile()
+        {
+            try
+            {
+                using (var wc = new WebClient())
+                    return wc.DownloadData(Model.SettingsCur.WebClientPath + "HashSum.hs");
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("No access to server", exc);
+            }
+        }
+        public void Download(ConcurrentBag<FileInfoContainer> Files, string path = ".\\")
+        {
+            Parallel.ForEach(Files, Model.parallelOptions, file =>
+               {
+                   var cfile = (file as FileInfoContainer);
+                   try
+                   {
+                       string webpath = WebUtility.UrlDecode(Model.SettingsCur.WebClientPath + cfile.FilePath.Replace("\\", "/"));
+                       var filepath = new FileInfo(path + cfile.FilePath);
+                       if (!filepath.Directory.Exists)
+                           filepath.Directory.Create();
+                       var pathtosave = filepath.FullName;
+                       if (cfile.Name.ToLower() == Model.ExecutionFileName.ToLower())
+                       {
+                           pathtosave = pathtosave.Replace(cfile.Name, $"[NEW]{cfile.Name}");
+                       }
+                       using (var wc = new WebClient())
+                           wc.DownloadFile(webpath, pathtosave);
+                   }
+                   catch (Exception exc)
+                   {
+                       new Exception($"Can't Download file {cfile.Name}", exc).Write();
+                   }
+                   finally
+                   {
+                       //System.Threading.Interlocked.Increment(ref DownloadedFiles.Value);
+                   }
+               });
+        }
+        class IntHolder
+        {
+            public int Value;
         }
     }
     public class FileInfoContainer
