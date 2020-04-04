@@ -293,7 +293,7 @@ namespace RFSTASIS_Launcher
                 public int dmPanningWidth;
                 public int dmPanningHeight;
             }
-            public static void GetResolutions()
+            public static string GetResolution()
             {
                 try
                 {
@@ -302,23 +302,23 @@ namespace RFSTASIS_Launcher
                     EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode);
                     var width = devMode.dmPelsWidth;
                     var height = devMode.dmPelsHeight;
-                    //ManagementObjectSearcher searcher =
-                    //    new ManagementObjectSearcher("root\\CIMV2",
-                    //    "SELECT * FROM Win32_PnPEntity where service=\"monitor\"");
-
-                    //int numberOfMonitors = searcher.Get().Count;
-                    //foreach(var mo in searcher.Get())
-                    //{
-                    //    var propert = mo.Properties;
-                    //}
-
+                    return $"{width}×{height}";
                 }
-                catch (ManagementException e)
+                catch (Exception){}
+                return "800×600";
+            }
+            public static List<string> GetResolutions()
+            {
+                var res = GetResolution();
+                string textres = "320×240:352×240:352×288:400×240:480×576:640×240:640×360:640×480:800×480:800×600:854×480:1024×600:1024×768:1152×864:1200×600:1280×768:1366×768:1280×1024:1440×900:1400×1050:1536×960:1536×1024:1600×900:1600×1024:1600×1200:1680×1050:1920×1080:1920×1200:2048×1152:2048×1536:2560×1440:2560×1600:3200×2048:3200×2400:3840×2400:3840×2160:5120×4096:6400×4096:6400×4800:7680×4320:7680×4800";
+                var allres = textres.Split(':').ToList();
+                if(allres.Contains(res))
                 {
+                    var ind = allres.IndexOf(res);
+                    var result = allres.Take(ind+1).ToList();
+                    return result;
                 }
-
-                //var width =System.Windows.SystemParameters.VirtualScreenWidth;
-                //var height = System.Windows.SystemParameters.VirtualScreenHeight;
+                return allres.Take(allres.IndexOf("800×600") + 1).ToList();
             }
         }
     }

@@ -47,12 +47,12 @@ namespace rlgn
         {
             get
             {
-                return screenX.ToString() + 'x' + screenY.ToString();
+                return screenX.ToString() + '×' + screenY.ToString();
                 
             }
             set
             {
-                string[] val = value.Split(new char[] { 'x' });
+                string[] val = value.Split(new char[] { '×' });
                 screenX = Convert.ToInt32(val[0]);
                 screenY = Convert.ToInt32(val[1]);
             }

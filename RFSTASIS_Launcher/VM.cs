@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace RFSTASIS_Launcher
@@ -19,6 +20,19 @@ namespace RFSTASIS_Launcher
         }
         public bool IsServerOnline => gameClient.IsServerOnline;
         public string ServerStatus => gameClient.ServerStatus;
+        public List<string> Reolutions { get; }= GameClient.ClientSettings.GetResolutions();
+        string _SelectedResolution = gameClient.clientSettings.engineSettings.Resolution;
+        public string SelectedResolution
+        {
+            get => _SelectedResolution;
+            set
+            {
+                _SelectedResolution = value;
+                OnPropertyChanged();
+                gameClient.clientSettings.engineSettings.Resolution = _SelectedResolution;
+                gameClient.clientSettings.Serialize();
+            }
+        }
         public GameClient.ClientSettings clientSettings
         {
             get => gameClient.clientSettings;
@@ -27,6 +41,7 @@ namespace RFSTASIS_Launcher
                 clientSettings = value;
                 gameClient.clientSettings = clientSettings;
                 OnPropertyChanged();
+                gameClient.clientSettings.Serialize();
             }
         }
         public bool IsResiveNow => !gameClient.IsResiveNow;
