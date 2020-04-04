@@ -17,11 +17,11 @@ namespace RFSTASIS_Launcher
 {
     class Model
     {
+        public static Settings SettingsCur = Settings.Deserialize();
         public static GameClient GClient = new GameClient();
         public static string ExecutionFileName { get; } = System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName;
-        public static Settings SettingsCur = Settings.Deserialize();
         public static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
-        public static Server Servak = new Server();
+        
         static public void Start()
         {
             GClient.GetUpdates();
@@ -123,13 +123,14 @@ namespace RFSTASIS_Launcher
                 OnPropertyChanged();
             }
         }
-        int _DownloadedFiles = 0;
-        public int DownloadedFiles
+        public int DownloadedFiles { get; set; } = 0;
+        int _DownloadProgres = 0;
+        public int DownloadProgres
         {
-            get => _DownloadedFiles;
+            get => _DownloadProgres;
             set
             {
-                _DownloadedFiles = value;
+                _DownloadProgres = value;
                 OnPropertyChanged();
             }
         }
@@ -218,6 +219,8 @@ namespace RFSTASIS_Launcher
         }
         public void Download(ConcurrentBag<FileInfoContainer> Files, string path = ".\\")
         {
+            object locker = new object();
+            FilesToDownloadCount = Files.Count;
             Parallel.ForEach(Files, Model.parallelOptions, file =>
                {
                    var cfile = (file as FileInfoContainer);
@@ -241,13 +244,16 @@ namespace RFSTASIS_Launcher
                    }
                    finally
                    {
+                       lock(locker)
+                       {
+                           DownloadedFiles++;
+                           DownloadedFileName = cfile.FilePath;
+                           var test  = (int)((double)DownloadedFiles / (double)FilesToDownloadCount * 100);
+                           DownloadProgres = test;
+                       }
                        //System.Threading.Interlocked.Increment(ref DownloadedFiles.Value);
                    }
                });
-        }
-        class IntHolder
-        {
-            public int Value;
         }
     }
     public class FileInfoContainer

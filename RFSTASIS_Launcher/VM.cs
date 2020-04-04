@@ -17,7 +17,17 @@ namespace RFSTASIS_Launcher
                 }
                 OnPropertyChanged(e.PropertyName);
             };
+            
         }
+        public int DownloadProgres 
+        {
+            get => gameClient.Servak.DownloadProgres;
+            set
+            {
+
+            }
+        }
+        public string DownloadedFileName => gameClient.Servak.DownloadedFileName;
         public bool IsServerOnline => gameClient.IsServerOnline;
         public string ServerStatus => gameClient.ServerStatus;
         Visibility _IsSettingsVisible = Visibility.Collapsed;

@@ -31,7 +31,8 @@ namespace RFSTASIS_Launcher
             {
                 InitializeComponent();
                 Model.GClient.InitializeNetwork();
-                GameClient.ClientSettings.GetResolutions(); 
+                GameClient.ClientSettings.GetResolutions();
+                Task.Run(()=>Model.GClient.GetUpdates());
             }
             catch (Exception exc)
             {

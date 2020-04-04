@@ -21,6 +21,7 @@ namespace RFSTASIS_Launcher
     public class GameClient : VMBase
     {
         public ClientSettings clientSettings { get; set; } = ClientSettings.Deserialize();
+        public Server Servak = new Server();
         NetworkClient networkClient;
         bool _IsServerOnline = false;
         public string ServerStatus
@@ -64,11 +65,15 @@ namespace RFSTASIS_Launcher
             }
         }
         public string Path => Environment.CurrentDirectory;
+        public GameClient()
+        {
+            Servak.PropertyChanged += (s, e) => { OnPropertyChanged(e.PropertyName); };
+        }
         public ConcurrentBag<FileInfoContainer> GetFilesHash()
         {
             ConcurrentBag<FileInfoContainer> res = new ConcurrentBag<FileInfoContainer>();
             var files = Directory.GetFiles(Path, "", SearchOption.AllDirectories);
-            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 1 }, file =>
+            Parallel.ForEach(files, file =>
             {
                 try
                 {

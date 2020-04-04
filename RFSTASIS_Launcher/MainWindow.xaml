@@ -131,13 +131,13 @@
             </StackPanel>
             <StackPanel>
                 <DockPanel>
-                    <ProgressBar Name="Progress" DockPanel.Dock="Left" Minimum="0" Maximum="100" Value="50" Width="150" Height="10"/>
+                    <ProgressBar Name="Progress" DockPanel.Dock="Left" Minimum="0" Maximum="100" Value="{Binding DownloadProgres,Mode=TwoWay}" Width="150" Height="10"/>
                     <WrapPanel DockPanel.Dock="Right">
                         <TextBlock  Margin="5 0 0 0" Foreground="Gray" Text="{Binding ElementName=Progress, Path=Value}"/>
                         <TextBlock Text="%" Foreground="Gray"/>
                     </WrapPanel>
                 </DockPanel>
-                <TextBlock Text="Filename" FontSize="10" Foreground="Gray" DockPanel.Dock="Bottom"/>
+                <TextBlock Text="{Binding DownloadedFileName}" FontSize="10" Foreground="Gray" DockPanel.Dock="Bottom"/>
             </StackPanel>
         </DockPanel>
     </StackPanel>
