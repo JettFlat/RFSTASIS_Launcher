@@ -20,7 +20,27 @@ namespace RFSTASIS_Launcher
         }
         public bool IsServerOnline => gameClient.IsServerOnline;
         public string ServerStatus => gameClient.ServerStatus;
-        public List<string> Reolutions { get; }= GameClient.ClientSettings.GetResolutions();
+        Visibility _IsSettingsVisible = Visibility.Collapsed;
+        public Visibility IsSettingsVisible
+        {
+            get => _IsSettingsVisible;
+            set
+            {
+                _IsSettingsVisible = value;
+                OnPropertyChanged();
+            }
+        }
+        Visibility _IsLoginVisible = Visibility.Visible;
+        public Visibility IsLoginVisible
+        {
+            get => _IsLoginVisible;
+            set
+            {
+                _IsLoginVisible = value;
+                OnPropertyChanged();
+            }
+        }
+        public List<string> Resolutions { get; } = GameClient.ClientSettings.GetResolutions();
         string _SelectedResolution = gameClient.clientSettings.engineSettings.Resolution;
         public string SelectedResolution
         {
@@ -33,6 +53,34 @@ namespace RFSTASIS_Launcher
                 gameClient.clientSettings.Serialize();
             }
         }
+        public List<string> Quality { get; } = new List<string> { "Very High", "High", "Medium", "Low" };
+        string _SelectedTexture = GetTextSettings(gameClient.clientSettings.engineSettings.TextureDetail);
+        public string SelectedTexture
+        {
+            get => _SelectedTexture;
+            set
+            {
+                _SelectedTexture = value;
+                OnPropertyChanged();
+                gameClient.clientSettings.engineSettings.TextureDetail = SetTextSettings(_SelectedTexture);
+                gameClient.clientSettings.Serialize();
+            }
+        }
+
+        string _SelectedDLight = GetTextSettings(gameClient.clientSettings.engineSettings.DynamicLight);
+        public string SelectedDLight
+        {
+            get => _SelectedDLight;
+            set
+            {
+                _SelectedDLight = value;
+                OnPropertyChanged();
+                gameClient.clientSettings.engineSettings.DynamicLight = SetTextSettings(_SelectedDLight);
+                gameClient.clientSettings.Serialize();
+            }
+        }
+
+
         public GameClient.ClientSettings clientSettings
         {
             get => gameClient.clientSettings;
@@ -75,5 +123,46 @@ namespace RFSTASIS_Launcher
             gameClient.clientSettings.Password = passwordBox.Password;
             gameClient.Start();
         });
+
+        public RelayCommand OpenSettings => new RelayCommand(o =>
+        {
+
+            IsSettingsVisible = Visibility.Visible;
+            IsLoginVisible = Visibility.Collapsed;
+        });
+        public RelayCommand OpenLogin => new RelayCommand(o =>
+        {
+
+            IsSettingsVisible = Visibility.Collapsed;
+            IsLoginVisible = Visibility.Visible;
+        });
+        public RelayCommand SaveSettings => new RelayCommand(o =>
+        {
+            gameClient.clientSettings.WriteEngineSettings();
+        });
+        static string GetTextSettings(int i)
+        {
+            if (i > 2)
+                return "Very High";
+            if (i == 2)
+                return "High";
+            if (i == 1)
+                return "Medium";
+            if (i < 1)
+                return "Low";
+            return "null";
+        }
+        static int SetTextSettings(string quality)
+        {
+            if (quality == "Very High")
+                return 3;
+            if (quality == "High")
+                return 2;
+            if (quality == "Medium")
+                return 1;
+            if (quality== "Low")
+                return 0;
+            return 0;
+        }
     }
 }

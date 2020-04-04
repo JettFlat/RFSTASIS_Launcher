@@ -30,7 +30,7 @@
         </DockPanel>
         <DockPanel>
             <StackPanel DockPanel.Dock="Right">
-                <materialDesign:Card Padding="10" Margin="16" Visibility="Visible">
+                <materialDesign:Card Padding="10" Margin="16" Visibility="{Binding IsLoginVisible}">
                     <StackPanel>
                         <TextBlock Text="LOGIN DETAILS"/>
                         <TextBox Text="{Binding NickName}"/>
@@ -48,12 +48,12 @@
                                     <TextBlock VerticalAlignment="Center" Text="MUSIC"/>
                                     <CheckBox Margin="5 5 5 5"/>
                                 </WrapPanel>
-                                <Button Margin="0 5 0 0" Content="SETTINGS"/>
+                                <Button Margin="0 5 0 0" Content="SETTINGS" Command="{Binding OpenSettings}"/>
                             </StackPanel>
                         </WrapPanel>
                     </StackPanel>
                 </materialDesign:Card>
-                <materialDesign:Card Padding="10" Margin="16" Visibility="Visible">
+                <materialDesign:Card Padding="10" Margin="16" Visibility="{Binding IsSettingsVisible}">
                     <StackPanel>
                         <TextBlock Text="Settings"/>
                         <DockPanel>
@@ -62,8 +62,27 @@
                         </DockPanel>
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Left" Text="Resolution"/>
-                            <ComboBox ItemsSource="{Binding Reolutions}" SelectedItem="{Binding SelectedResolution}"/>
+                            <ComboBox ItemsSource="{Binding Resolutions}" SelectedItem="{Binding SelectedResolution}"/>
                         </DockPanel>
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="Texture Detail"/>
+                            <ComboBox ItemsSource="{Binding Quality}" SelectedItem="{Binding SelectedTexture}"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="Dynamic Light"/>
+                            <ComboBox ItemsSource="{Binding Quality}" SelectedItem="{Binding SelectedDLight}"/>
+                        </DockPanel>
+                        <Grid Margin="0 5 0 0">
+                            <Button Margin="0 0 5 0" Grid.Column="0" HorizontalAlignment="Stretch" Content="Save" Command="{Binding SaveSettings}"/>
+                            <Button Margin="5 0 0 0" Grid.Column="1" HorizontalAlignment="Stretch" Content="Cancel" Command="{Binding OpenLogin}"/>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                        </Grid>
                     </StackPanel>
                 </materialDesign:Card>
             </StackPanel>
