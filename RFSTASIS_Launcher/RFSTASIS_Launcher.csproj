@@ -7,15 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="bg.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.14.0" />
     <PackageReference Include="MaterialDesignThemes" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Update="bg.jpg">
+    <Resource Include="bg.jpg">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="labmg.mp3">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
@@ -40,8 +47,8 @@
   </ItemGroup>
 
   <Target Name="CopyFiles" AfterTargets="Compile">
-    <Copy SourceFiles="$(ProjectDir)\bg.jpg" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true"/>
-  <Copy SourceFiles="$(ProjectDir)\labmg.mp3" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true"/>
+    <Copy SourceFiles="$(ProjectDir)\bg.jpg" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
+  <Copy SourceFiles="$(ProjectDir)\labmg.mp3" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
   </Target>
 
 

@@ -17,14 +17,23 @@ namespace RFSTASIS_Launcher
                 }
                 OnPropertyChanged(e.PropertyName);
             };
-            
+
         }
-        public int DownloadProgres 
+        public int DownloadProgres
         {
             get => gameClient.Servak.DownloadProgres;
             set
             {
 
+            }
+        }
+        public string DisplayedImage
+        {
+            get
+            {
+                if (System.IO.File.Exists("System/bg.jpg"))
+                { }
+                    return @"System/bg.jpg";
             }
         }
         public string DownloadedFileName => gameClient.Servak.DownloadedFileName;
@@ -114,7 +123,7 @@ namespace RFSTASIS_Launcher
                 gameClient.clientSettings.Serialize();
             }
         }
-        string _SelectedGamma = gameClient.clientSettings.engineSettings.Gamma.ToString().Replace(',','.');
+        string _SelectedGamma = gameClient.clientSettings.engineSettings.Gamma.ToString().Replace(',', '.');
         public string SelectedGamma
         {
             get => _SelectedGamma;
@@ -122,7 +131,7 @@ namespace RFSTASIS_Launcher
             {
                 _SelectedGamma = value;
                 OnPropertyChanged();
-                var gamma = Decimal.Parse(_SelectedGamma.Replace('.',','));
+                var gamma = Decimal.Parse(_SelectedGamma.Replace('.', ','));
                 gameClient.clientSettings.engineSettings.Gamma = gamma;
                 gameClient.clientSettings.Serialize();
             }
@@ -136,7 +145,7 @@ namespace RFSTASIS_Launcher
             {
                 _IsDTextures = value;
                 OnPropertyChanged();
-                gameClient.clientSettings.engineSettings.DetailedTextures= _IsDTextures;
+                gameClient.clientSettings.engineSettings.DetailedTextures = _IsDTextures;
                 gameClient.clientSettings.Serialize();
             }
         }

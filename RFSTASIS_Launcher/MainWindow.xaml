@@ -23,7 +23,7 @@
     </Window.DataContext>
     <StackPanel>
         <StackPanel.Background>
-            <ImageBrush ImageSource="/MyProject;component/bg.jpg" Stretch="UniformToFill"/>
+            <ImageBrush ImageSource="bg.jpg" Stretch="UniformToFill"/>
         </StackPanel.Background>
         <DockPanel>
             <StackPanel DockPanel.Dock="Left" Margin="5 5 5 5">
@@ -32,31 +32,31 @@
             </StackPanel>
         </DockPanel>
         <DockPanel>
-            <StackPanel DockPanel.Dock="Right">
-                <materialDesign:Card Padding="10" Margin="16" Visibility="{Binding IsLoginVisible}">
-                    <StackPanel>
-                        <TextBlock Text="LOGIN DETAILS"/>
-                        <TextBox Text="{Binding NickName}"/>
-                        <PasswordBox Name="PasswordBoxe"/>
-                        <WrapPanel Margin="0 10 0 0">
-                            <StackPanel Margin="0 0 5 0">
-                                <WrapPanel>
-                                    <TextBlock VerticalAlignment="Center" Text="WINDOW MODE"/>
-                                    <CheckBox Margin="5 5 5 5" IsChecked="{Binding WindowMode}"/>
-                                </WrapPanel>
-                                <Button Margin="0 5 0 0" IsEnabled="{Binding IsResiveNow}" Content="LOGIN" Command="{Binding Start}" CommandParameter="{Binding ElementName=PasswordBoxe}"/>
-                            </StackPanel>
-                            <StackPanel Margin="5 0 0 0">
-                                <WrapPanel>
-                                    <TextBlock VerticalAlignment="Center" Text="MUSIC"/>
-                                    <CheckBox Margin="5 5 5 5"/>
-                                </WrapPanel>
-                                <Button Margin="0 5 0 0" Content="SETTINGS" Command="{Binding OpenSettings}"/>
-                            </StackPanel>
-                        </WrapPanel>
-                    </StackPanel>
-                </materialDesign:Card>
-                <materialDesign:Card Padding="10" Margin="16" Visibility="{Binding IsSettingsVisible}">
+            <StackPanel Orientation="Horizontal" Height="400"  DockPanel.Dock="Right">
+                    <materialDesign:Card Padding="10" Margin="16" VerticalAlignment="Center" Visibility="{Binding IsLoginVisible}">
+                        <StackPanel>
+                            <TextBlock Text="LOGIN DETAILS"/>
+                            <TextBox Text="{Binding NickName}"/>
+                            <PasswordBox Name="PasswordBoxe"/>
+                            <WrapPanel Margin="0 10 0 0">
+                                <StackPanel Margin="0 0 5 0">
+                                    <WrapPanel>
+                                        <TextBlock VerticalAlignment="Center" Text="WINDOW MODE"/>
+                                        <CheckBox Margin="5 5 5 5" IsChecked="{Binding WindowMode}"/>
+                                    </WrapPanel>
+                                    <Button Margin="0 5 0 0" IsEnabled="{Binding IsResiveNow}" Content="LOGIN" Command="{Binding Start}" CommandParameter="{Binding ElementName=PasswordBoxe}"/>
+                                </StackPanel>
+                                <StackPanel Margin="5 0 0 0">
+                                    <WrapPanel>
+                                        <TextBlock VerticalAlignment="Center" Text="MUSIC"/>
+                                        <CheckBox Margin="5 5 5 5"/>
+                                    </WrapPanel>
+                                    <Button Margin="0 5 0 0" Content="SETTINGS" Command="{Binding OpenSettings}"/>
+                                </StackPanel>
+                            </WrapPanel>
+                        </StackPanel>
+                    </materialDesign:Card>
+                <materialDesign:Card  Name="SettingsCard" Padding="10" Margin="16" Visibility="{Binding IsSettingsVisible}">
                     <Grid Grid.IsSharedSizeScope="True">
                         <Grid.Resources>
                             <!--<Style x:Key="MaterialDesignRaisedButton" BasedOn="{StaticResource MaterialDesignRaisedButton}" TargetType="{x:Type Button}">
@@ -97,8 +97,8 @@
                         <CheckBox Grid.Row="9" Grid.Column="1" Content="Mouse Acceleration" IsChecked="{Binding IsMAcceleration}"/>
 
                         <Button HorizontalAlignment="Stretch" Content="Save" Command="{Binding SaveSettings}"
-                                 Grid.Row="10" Grid.Column="0" Width="{Binding ElementName=Cancel,Path=Width}"/>
-                        <Button Grid.Row="10" Name="Cancel" Grid.Column="1" HorizontalAlignment="Stretch" Content="Back" Command="{Binding OpenLogin}"/>
+                                 Grid.Row="10" Grid.Column="0"/>
+                        <Button Grid.Row="10"  Name="Cancel" Grid.Column="1" HorizontalAlignment="Stretch" Content="Back" Command="{Binding OpenLogin}"/>
                         <Grid.RowDefinitions>
                             <RowDefinition/>
                             <RowDefinition/>
@@ -110,7 +110,7 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
-                            <RowDefinition/>
+                            <RowDefinition Height="40px"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition SharedSizeGroup="A" />
