@@ -125,6 +125,17 @@ namespace RFSTASIS_Launcher
             {
                 _FilesToDownloadCount = value;
                 OnPropertyChanged();
+                OnPropertyChanged("NeedUpdate");
+            }
+        }
+        bool _NeedUpdate = false;
+        public bool NeedUpdate
+        {
+            get
+            {
+                if (FilesToDownloadCount > 0)
+                    return true;
+                return false;
             }
         }
         public int DownloadedFiles { get; set; } = 0;

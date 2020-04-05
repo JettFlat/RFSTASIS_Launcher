@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>trinity.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +25,9 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <None Update="R3Engine.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Replacer.deps.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -39,11 +43,19 @@
     <None Update="Replacer.runtimeconfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="windowsdesktop-runtime-3.1.3-win-x64.exe">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="windowsdesktop-runtime-3.1.3-win-x86.exe">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Target Name="CopyFiles" AfterTargets="Compile">
     <Copy SourceFiles="$(ProjectDir)\bg.jpg" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
   <Copy SourceFiles="$(ProjectDir)\labmg.wav" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)\windowsdesktop-runtime-3.1.3-win-x64.exe" DestinationFolder="$(OutDir)\ToInstall" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)\windowsdesktop-runtime-3.1.3-win-x86.exe" DestinationFolder="$(OutDir)\ToInstall" OverwriteReadOnlyFiles="true" />
   </Target>
 
 

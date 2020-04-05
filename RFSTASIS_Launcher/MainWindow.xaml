@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RFSTASIS_Launcher"
         mc:Ignorable="d"
-        Title="MainWindow"
+        Title="RFSTASIS Launcher"
         SizeToContent="WidthAndHeight"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
      TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -129,7 +129,7 @@
                 <!--<TextBlock Text="Version: 1.27" Foreground="Gray"/>-->
             </StackPanel>
             <StackPanel>
-                <DockPanel>
+                <DockPanel Visibility="{Binding UpdateContainerVisibility}">
                     <ProgressBar Name="Progress" DockPanel.Dock="Left" Minimum="0" Maximum="100" Value="{Binding DownloadProgres,Mode=TwoWay}" Width="150" Height="10"/>
                     <WrapPanel DockPanel.Dock="Right">
                         <TextBlock  Margin="5 0 0 0" Foreground="Gray" Text="{Binding ElementName=Progress, Path=Value}"/>

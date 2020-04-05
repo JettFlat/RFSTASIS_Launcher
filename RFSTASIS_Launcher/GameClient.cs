@@ -23,6 +23,7 @@ namespace RFSTASIS_Launcher
         public ClientSettings clientSettings { get; set; } = ClientSettings.Deserialize();
         public Server Servak = new Server();
         NetworkClient networkClient;
+
         bool _IsUpdateComplete = false;
         public bool IsUpdateComplete
         {

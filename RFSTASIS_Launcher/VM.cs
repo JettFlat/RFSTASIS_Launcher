@@ -16,9 +16,22 @@ namespace RFSTASIS_Launcher
                 {
                     MessageBox.Show(gameClient.ServerMessage, "Error");
                 }
+                if (e.PropertyName == "NeedUpdate")
+                    OnPropertyChanged("UpdateContainerVisibility");
                 OnPropertyChanged(e.PropertyName);
             };
             IsMusicOn = true;
+        }
+        public bool NeedUpdate => gameClient.Servak.NeedUpdate;
+        public Visibility UpdateContainerVisibility
+        {
+            get
+            {
+                if (NeedUpdate)
+                    return Visibility.Visible;
+                else
+                    return Visibility.Collapsed;
+            }
         }
         public int DownloadProgres
         {
