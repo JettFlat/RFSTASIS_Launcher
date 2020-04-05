@@ -1,8 +1,6 @@
 ﻿using MiniLauncher.Network.BinaryConverter;
 using MiniLauncher.Network.Packets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -39,6 +37,7 @@ namespace MiniLauncher.Network
         private readonly ManualResetEvent _receiveDone =
             new ManualResetEvent(false);
         public Socket Client { get; set; }
+        public bool IsResived { get; set; } = false;
 
         public NetworkEx(string sIpAddr, int iPort)
         {
@@ -47,29 +46,39 @@ namespace MiniLauncher.Network
         }
         public void StartClient()
         {
-            try
+            bool IsSuccessfully = false;
+            while (!IsSuccessfully)
             {
-                IPAddress ipAddress = IPAddress.Parse(_ipAddr);
-                IpAddress = ipAddress;
-                IPEndPoint remoteEp = new IPEndPoint(ipAddress, _port);
+                try
+                {
+                    IPAddress ipAddress = IPAddress.Parse(_ipAddr);
+                    IpAddress = ipAddress;
+                    IPEndPoint remoteEp = new IPEndPoint(ipAddress, _port);
 
-                Client = new Socket(AddressFamily.InterNetwork,
-                    SocketType.Stream, ProtocolType.Tcp);
+                    Client = new Socket(AddressFamily.InterNetwork,
+                        SocketType.Stream, ProtocolType.Tcp);
 
-                Client.BeginConnect(remoteEp,
-                    ConnectCallback, Client);
-                _connectDone.WaitOne();
+                    Client.BeginConnect(remoteEp,
+                        ConnectCallback, Client);
+                    var cd = _connectDone.WaitOne(2000);
 
-                Receive(Client);
-                _receiveDone.WaitOne();
-
-                Client.Shutdown(SocketShutdown.Both);
-                Client.Close();
-
-            }
-            catch (Exception e)
-            {
-                OnClientError();
+                    Receive(Client);
+                    _receiveDone.WaitOne();
+                    if (cd && IsResived)
+                        IsSuccessfully = true;
+                }
+                catch (Exception e)
+                {
+                    OnClientError();
+                    Thread.Sleep(1000);
+                }
+                finally
+                {
+                    //Client.Shutdown(SocketShutdown.Both);
+                    //Client.Close();
+                    _receiveDone.Reset();
+                    _connectDone.Reset();
+                }
             }
         }
         public void StopListen()
@@ -97,6 +106,7 @@ namespace MiniLauncher.Network
 
         private void Receive(Socket client)
         {
+            
             try
             {
                 StateObject state = new StateObject { WorkSocket = client };
@@ -107,16 +117,16 @@ namespace MiniLauncher.Network
             catch (Exception e)
             {
                 OnClientError();
+                _receiveDone.Set();
             }
         }
         private void ReceiveCallback(IAsyncResult ar)
         {
             StateObject state = (StateObject)ar.AsyncState;
             Socket client = state.WorkSocket;
-
-            int bytesRead = client.EndReceive(ar);
             try
             {
+                int bytesRead = client.EndReceive(ar);
                 if (_acceptRecive)
                 {
                     for (int i = 0; i < bytesRead;)
@@ -128,15 +138,9 @@ namespace MiniLauncher.Network
                         {
                             data[j] = state.Buffer[i + j + 4];
                         }
-                        if ((int)msgHeader.m_bySubType == 8)
-                        {
-
-                        }
-
                         i += msgHeader.m_wSize;
                         DataAnalyze(client, msgHeader, data);
                     }
-
                     client.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0,
                             ReceiveCallback, state);
                 }
@@ -145,10 +149,13 @@ namespace MiniLauncher.Network
                     _receiveDone.Set();
                 }
             }
-            catch (Exception )
+            catch (Exception exc)
             {
                 OnClientError();
+                _receiveDone.Set();
+                //throw new Exception("Disconnected", exc);
             }
+
         }
 
         public void Send(Socket client, byte[] byteData)
