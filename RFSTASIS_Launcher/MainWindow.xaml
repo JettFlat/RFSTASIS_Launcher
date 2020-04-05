@@ -14,6 +14,7 @@
         TextElement.FontFamily="Sans"
         MinWidth="700"
         ResizeMode="NoResize"
+        WindowStyle="None"
      TextOptions.TextFormattingMode="Ideal"
      TextOptions.TextRenderingMode="Auto"
      Background="{DynamicResource MaterialDesignPaper}"
@@ -21,7 +22,7 @@
     <Window.DataContext>
         <local:VM/>
     </Window.DataContext>
-    <StackPanel>
+    <StackPanel MouseDown="StackPanel_MouseDown">
         <StackPanel.Background>
             <ImageBrush ImageSource="bg.jpg" Stretch="UniformToFill"/>
         </StackPanel.Background>
@@ -30,38 +31,36 @@
                 <TextBlock FontSize="25" Text="RF STASIS"/>
                 <TextBlock FontSize="10" Text="CLASSIC RFONLINE REBORN"/>
             </StackPanel>
+            <Button Style="{StaticResource MaterialDesignIconForegroundButton}" Command="{Binding Exit}" HorizontalAlignment="Right" Content="{materialDesign:PackIcon Close}" DockPanel.Dock="Right"/>
         </DockPanel>
         <DockPanel>
             <StackPanel Orientation="Horizontal" Height="400"  DockPanel.Dock="Right">
-                    <materialDesign:Card Padding="10" Margin="16" VerticalAlignment="Center" Visibility="{Binding IsLoginVisible}">
-                        <StackPanel>
-                            <TextBlock Text="LOGIN DETAILS"/>
-                            <TextBox Text="{Binding NickName}"/>
-                            <PasswordBox Name="PasswordBoxe"/>
-                            <WrapPanel Margin="0 10 0 0">
-                                <StackPanel Margin="0 0 5 0">
-                                    <WrapPanel>
-                                        <TextBlock VerticalAlignment="Center" Text="WINDOW MODE"/>
-                                        <CheckBox Margin="5 5 5 5" IsChecked="{Binding WindowMode}"/>
-                                    </WrapPanel>
-                                    <Button Margin="0 5 0 0" IsEnabled="{Binding IsResiveNow}" Content="LOGIN" Command="{Binding Start}" CommandParameter="{Binding ElementName=PasswordBoxe}"/>
-                                </StackPanel>
-                                <StackPanel Margin="5 0 0 0">
-                                    <WrapPanel>
-                                        <TextBlock VerticalAlignment="Center" Text="MUSIC"/>
-                                        <CheckBox Margin="5 5 5 5"/>
-                                    </WrapPanel>
-                                    <Button Margin="0 5 0 0" Content="SETTINGS" Command="{Binding OpenSettings}"/>
-                                </StackPanel>
-                            </WrapPanel>
-                        </StackPanel>
-                    </materialDesign:Card>
+                <materialDesign:Card Padding="10" Margin="16" VerticalAlignment="Center" Visibility="{Binding IsLoginVisible}">
+                    <StackPanel>
+                        <TextBlock Text="LOGIN DETAILS"/>
+                        <TextBox Text="{Binding NickName}"/>
+                        <PasswordBox Name="PasswordBoxe"/>
+                        <WrapPanel Margin="0 10 0 0">
+                            <StackPanel Margin="0 0 5 0">
+                                <WrapPanel>
+                                    <TextBlock VerticalAlignment="Center" Text="WINDOW MODE"/>
+                                    <CheckBox Margin="5 5 5 5" IsChecked="{Binding WindowMode}"/>
+                                </WrapPanel>
+                                <Button Margin="0 5 0 0" IsEnabled="{Binding IsResiveNow}" Content="LOGIN" Command="{Binding Start}" CommandParameter="{Binding ElementName=PasswordBoxe}"/>
+                            </StackPanel>
+                            <StackPanel Margin="5 0 0 0">
+                                <WrapPanel>
+                                    <TextBlock VerticalAlignment="Center" Text="MUSIC"/>
+                                    <CheckBox IsChecked="{Binding IsMusicOn}" Margin="5 5 5 5"/>
+                                </WrapPanel>
+                                <Button Margin="0 5 0 0" Content="SETTINGS" Command="{Binding OpenSettings}"/>
+                            </StackPanel>
+                        </WrapPanel>
+                    </StackPanel>
+                </materialDesign:Card>
                 <materialDesign:Card  Name="SettingsCard" Padding="10" Margin="16" Visibility="{Binding IsSettingsVisible}">
                     <Grid Grid.IsSharedSizeScope="True">
                         <Grid.Resources>
-                            <!--<Style x:Key="MaterialDesignRaisedButton" BasedOn="{StaticResource MaterialDesignRaisedButton}" TargetType="{x:Type Button}">
-                                <Setter Property="Margin" Value="5" />
-                            </Style>-->
                             <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
                                 <Setter Property="Margin" Value="3 5 3 0"/>
                             </Style>

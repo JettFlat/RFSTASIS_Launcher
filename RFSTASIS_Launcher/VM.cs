@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Media;
 using System.Windows;
 
 namespace RFSTASIS_Launcher
@@ -17,7 +18,7 @@ namespace RFSTASIS_Launcher
                 }
                 OnPropertyChanged(e.PropertyName);
             };
-
+            IsMusicOn = true;
         }
         public int DownloadProgres
         {
@@ -27,13 +28,40 @@ namespace RFSTASIS_Launcher
 
             }
         }
+        bool _IsMusicOn = true;
+        public bool IsMusicOn
+        {
+            get => _IsMusicOn;
+            set
+            {
+                _IsMusicOn = value;
+                if (_IsMusicOn && Splayer != null)
+                {
+                    Splayer.PlayLooping();
+                }
+                if (_IsMusicOn == false && Splayer != null)
+                {
+                    Splayer.Stop();
+                }
+                OnPropertyChanged();
+            }
+        }
+        SoundPlayer Splayer { get; } = GetPlayer();
+        static SoundPlayer GetPlayer(string wavsound = @"System/labmg.wav")
+        {
+            if (System.IO.File.Exists(wavsound))
+            {
+                return new SoundPlayer(wavsound);
+            }
+            return null;
+        }
         public string DisplayedImage
         {
             get
             {
                 if (System.IO.File.Exists("System/bg.jpg"))
                 { }
-                    return @"System/bg.jpg";
+                return @"System/bg.jpg";
             }
         }
         public string DownloadedFileName => gameClient.Servak.DownloadedFileName;
@@ -222,6 +250,7 @@ namespace RFSTASIS_Launcher
             gameClient.clientSettings.Serialize();
             gameClient.clientSettings.WriteEngineSettings();
         });
+        public RelayCommand Exit => new RelayCommand(o => Environment.Exit(0));
         static string GetTextSettings(int i)
         {
             if (i > 2)

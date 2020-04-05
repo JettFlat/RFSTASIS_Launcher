@@ -20,7 +20,6 @@ namespace RFSTASIS_Launcher
         public static Settings SettingsCur = Settings.Deserialize();
         public static GameClient GClient = new GameClient();
         public static string ExecutionFileName { get; } = System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName;
-        public static ParallelOptions parallelOptions = new ParallelOptions();// { MaxDegreeOfParallelism = 1 };
         
         static public void Start()
         {
@@ -31,6 +30,8 @@ namespace RFSTASIS_Launcher
             public string WebClientPath { get; set; }
             public List<string> FilesToIgnore { get; set; }
             public List<string> FilesToNotUpdate { get; set; }
+            public ParallelOptions HashOptions { get; set; }
+            public ParallelOptions DownloadOptions { get; set; }
             public ServerSetting Servercfg { get; set; }
             public static Settings Deserialize(string path = "Settings.json")
             {
@@ -45,7 +46,7 @@ namespace RFSTASIS_Launcher
                     WebClientPath = "http://update1.rfstasis.com/clientpatch/",
                     FilesToIgnore = new List<string> {
                         "MD5 Hash Updater.deps.json","MD5 Hash Updater.dll","MD5 Hash Updater.exe","MD5 Hash Updater.pdb","MD5 Hash Updater.runtimeconfig.dev.json","MD5 Hash Updater.runtimeconfig.json"
-                        ,"Exceptions.txt","NetLog\\rfclient.log","NetLog\\Odin.log","NetLog\\EffectLog.log","NetLog\\Client-Net.log","NetLog\\CEngineLog.log","NetLog\\Critical.Log"
+                        ,"Exceptions.txt","NetLog\\rfclient.log","NetLog\\Odin.log","NetLog\\EffectLog.log","NetLog\\Client-Net.log","NetLog\\CEngineLog.log","NetLog\\Critical.Log","ClientSettings.json",
                     },
                     FilesToNotUpdate = new List<string> { "R3Engine.ini", "System\\DefaultSet.tmp" },
                     Servercfg = new ServerSetting
@@ -55,7 +56,9 @@ namespace RFSTASIS_Launcher
                         OverrideServerSelection = true,
                         ServerAddress = "64.31.6.86:27780",
                         ServerIndexSelect = 0
-                    }
+                    },
+                    HashOptions = new ParallelOptions { MaxDegreeOfParallelism=4},
+                    DownloadOptions = new ParallelOptions(),
                 };
                 set.Serialize();
                 return set;
@@ -181,7 +184,7 @@ namespace RFSTASIS_Launcher
                     var document = context.OpenAsync(req => req.Content(page)).Result;
                     var list = document.QuerySelectorAll("a").ToList();
                     list.RemoveRange(0, 5);
-                    Parallel.ForEach(list, Model.parallelOptions, o =>
+                    Parallel.ForEach(list, o =>
                     {
                         var text = (o as AngleSharp.Dom.IElement)?.Attributes[0]?.Value;
                         var textdecoded = WebUtility.UrlDecode(text);
@@ -221,7 +224,7 @@ namespace RFSTASIS_Launcher
         {
             object locker = new object();
             FilesToDownloadCount = Files.Count;
-            Parallel.ForEach(Files, Model.parallelOptions, file =>
+            Parallel.ForEach(Files, Model.SettingsCur.DownloadOptions, file =>
                {
                    var cfile = (file as FileInfoContainer);
                    try

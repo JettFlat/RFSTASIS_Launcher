@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.14.0" />
     <PackageReference Include="MaterialDesignThemes" Version="3.0.1" />
+    <PackageReference Include="MP3Sharp" Version="1.0.5" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
@@ -23,9 +24,6 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <None Update="labmg.mp3">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
     <None Update="Replacer.deps.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -38,9 +36,6 @@
     <None Update="Replacer.pdb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Replacer.runtimeconfig.dev.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Replacer.runtimeconfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -48,7 +43,7 @@
 
   <Target Name="CopyFiles" AfterTargets="Compile">
     <Copy SourceFiles="$(ProjectDir)\bg.jpg" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
-  <Copy SourceFiles="$(ProjectDir)\labmg.mp3" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
+  <Copy SourceFiles="$(ProjectDir)\labmg.wav" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
   </Target>
 
 

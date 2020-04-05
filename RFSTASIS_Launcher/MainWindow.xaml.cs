@@ -40,5 +40,10 @@ namespace RFSTASIS_Launcher
                 exc.ShowMessage();
             }
         }
+
+        private void StackPanel_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            this.DragMove();
+        }
     }
 }

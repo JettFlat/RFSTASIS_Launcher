@@ -73,7 +73,7 @@ namespace RFSTASIS_Launcher
         {
             ConcurrentBag<FileInfoContainer> res = new ConcurrentBag<FileInfoContainer>();
             var files = Directory.GetFiles(Path, "", SearchOption.AllDirectories);
-            Parallel.ForEach(files, file =>
+            Parallel.ForEach(files,Model.SettingsCur.HashOptions, file =>
             {
                 try
                 {
@@ -101,20 +101,20 @@ namespace RFSTASIS_Launcher
             var todownload = server.Where(s => tmp.Any(l => s.FilePath == l)).ToList();
             toupdate.AddRange(todownload);
             Servak.Download(new ConcurrentBag<FileInfoContainer>(toupdate));
-            //if (File.Exists($"[NEW]{ExecutionFileName}"))
-            //{
-            //    var id = Process.GetCurrentProcess().Id;
-            //    try
-            //    {
-            //        var args = $"{id} \"{ExecutionFileName}\" \"[NEW]{ExecutionFileName}\"";
-            //        Process.Start("Replacer.exe", args);
-            //        Environment.Exit(0);
-            //    }
-            //    catch (Exception exc)
-            //    {
-            //        new Exception("Can't start Replacer.exe", exc).Write();
-            //    }
-            //}
+            if (File.Exists($"[NEW]{ExecutionFileName}"))
+            {
+                var id = Process.GetCurrentProcess().Id;
+                try
+                {
+                    var args = $"{id} \"{ExecutionFileName}\" \"[NEW]{ExecutionFileName}\"";
+                    Process.Start("Replacer.exe", args);
+                    Environment.Exit(0);
+                }
+                catch (Exception exc)
+                {
+                    new Exception("Can't start Replacer.exe", exc).Write();
+                }
+            }
         }
         public void Start()
         {
