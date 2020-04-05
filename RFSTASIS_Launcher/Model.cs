@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Net.Http;
-using AngleSharp;
 using System.Diagnostics;
 using MiniLauncher.Data;
 
@@ -183,43 +182,7 @@ namespace RFSTASIS_Launcher
             }
             return null;
         }
-        public void Parse()
-        {
-            while (Paths.Count > 0)
-            {
-                string url = Paths.Take();
-                try
-                {
-                    var page = new WebClient().DownloadString(url);
-                    var config = Configuration.Default;
-                    var context = BrowsingContext.New(config);
-                    var document = context.OpenAsync(req => req.Content(page)).Result;
-                    var list = document.QuerySelectorAll("a").ToList();
-                    list.RemoveRange(0, 5);
-                    Parallel.ForEach(list, o =>
-                    {
-                        var text = (o as AngleSharp.Dom.IElement)?.Attributes[0]?.Value;
-                        var textdecoded = WebUtility.UrlDecode(text);
-                        var cpath = url + text;
-                        if (Model.SettingsCur.FilesToIgnore.Any(x => textdecoded.ToLower().Contains(x.ToLower())))
-                            return;
-                        if (text.Contains('/'))
-                        {
-                            Paths.Add(cpath);
-                        }
-                        else
-                        {
-                            FilesLink.Add(cpath);
-                        }
-                    });
-                }
-                catch (Exception exc)
-                {
-
-                }
-            }
-            File.WriteAllText("FilesLink.txt", JsonConvert.SerializeObject(FilesLink));
-        }
+       
         public byte[] DownloadHashFile()
         {
             try
