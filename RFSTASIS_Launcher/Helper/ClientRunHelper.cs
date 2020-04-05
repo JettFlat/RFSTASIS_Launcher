@@ -24,12 +24,6 @@ namespace MiniLauncher.Helper
         }
         public static void RunClient(string filepath)
         {
-            if (!File.Exists(filepath))
-            {
-                MessageBox.Show(LocalizationManager.GetInstance.GetString("ExetubleFileNotFound"));
-                return;
-            }
-
             Process clientProcess = new Process();
             clientProcess.StartInfo.CreateNoWindow = false;
             clientProcess.StartInfo.FileName = filepath;

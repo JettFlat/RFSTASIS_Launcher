@@ -55,6 +55,7 @@ namespace RFSTASIS_Launcher
             }
             return null;
         }
+        public bool CanLogin => gameClient.CanLogin;
         public string DisplayedImage
         {
             get
@@ -201,7 +202,7 @@ namespace RFSTASIS_Launcher
                 gameClient.clientSettings.Serialize();
             }
         }
-        public bool IsResiveNow => !gameClient.IsResiveNow;
+        //public bool IsResiveNow => !gameClient.IsResiveNow;
         bool _WindowMode = !gameClient.clientSettings.engineSettings.FullScreen;
         public bool WindowMode
         {

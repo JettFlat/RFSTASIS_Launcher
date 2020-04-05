@@ -23,6 +23,24 @@ namespace RFSTASIS_Launcher
         public ClientSettings clientSettings { get; set; } = ClientSettings.Deserialize();
         public Server Servak = new Server();
         NetworkClient networkClient;
+        bool _IsUpdateComplete = false;
+        public bool IsUpdateComplete
+        {
+            get => _IsUpdateComplete;
+            set
+            {
+                _IsUpdateComplete = value;
+                OnPropertyChanged();
+                OnPropertyChanged("CanLogin");
+            }
+        }
+        public bool CanLogin
+        {
+            get
+            {
+                return (IsUpdateComplete && !IsResiveNow);
+            }
+        }
         bool _IsServerOnline = false;
         public string ServerStatus
         {
@@ -52,6 +70,7 @@ namespace RFSTASIS_Launcher
             {
                 _IsResiveNow = value;
                 OnPropertyChanged();
+                OnPropertyChanged("CanLogin");
             }
         }
         string _ServerMessage;
@@ -115,6 +134,7 @@ namespace RFSTASIS_Launcher
                     new Exception("Can't start Replacer.exe", exc).Write();
                 }
             }
+            IsUpdateComplete = true;
         }
         public void Start()
         {

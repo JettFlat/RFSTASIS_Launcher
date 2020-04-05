@@ -47,6 +47,7 @@ namespace RFSTASIS_Launcher
                     FilesToIgnore = new List<string> {
                         "MD5 Hash Updater.deps.json","MD5 Hash Updater.dll","MD5 Hash Updater.exe","MD5 Hash Updater.pdb","MD5 Hash Updater.runtimeconfig.dev.json","MD5 Hash Updater.runtimeconfig.json"
                         ,"Exceptions.txt","NetLog\\rfclient.log","NetLog\\Odin.log","NetLog\\EffectLog.log","NetLog\\Client-Net.log","NetLog\\CEngineLog.log","NetLog\\Critical.Log","ClientSettings.json",
+                        "RFStasis_Launcher.exe",
                     },
                     FilesToNotUpdate = new List<string> { "R3Engine.ini", "System\\DefaultSet.tmp" },
                     Servercfg = new ServerSetting
