@@ -9,15 +9,12 @@
     <ApplicationIcon>trinity.ico</ApplicationIcon>
   </PropertyGroup>
 
-
   <ItemGroup>
     <EmbeddedResource Include="labmg.wav" />
     <EmbeddedResource Include="R3Engine.ini">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Replacer.exe">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Replacer.exe" />
   </ItemGroup>
 
   <ItemGroup>
