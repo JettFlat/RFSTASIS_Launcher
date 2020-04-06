@@ -4,8 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
-    <PublishSingleFile>true</PublishSingleFile>
+    <PublishSingleFile>false</PublishSingleFile>
     <ApplicationIcon>trinity.ico</ApplicationIcon>
   </PropertyGroup>
 

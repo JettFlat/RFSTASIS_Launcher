@@ -24,6 +24,7 @@ namespace RFSTASIS_Launcher
         public static string ExecutionFileName { get; } = System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName;
         static public void Start()
         {
+            
             //var test = ;
             GClient.GetUpdates();
         }
