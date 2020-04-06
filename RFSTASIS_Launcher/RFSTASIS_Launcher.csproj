@@ -2,15 +2,22 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
-    <PublishSingleFile>true</PublishSingleFile>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
     <ApplicationIcon>trinity.ico</ApplicationIcon>
   </PropertyGroup>
 
+
   <ItemGroup>
-    <None Remove="bg.jpg" />
+    <EmbeddedResource Include="labmg.wav" />
+    <EmbeddedResource Include="R3Engine.ini">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Replacer.exe">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -24,19 +31,7 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
-  <ItemGroup>
-    <None Update="R3Engine.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Replacer.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 
-  <Target Name="CopyFiles" AfterTargets="Compile">
-    <Copy SourceFiles="$(ProjectDir)\bg.jpg" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
-  <Copy SourceFiles="$(ProjectDir)\labmg.wav" DestinationFolder="$(OutDir)\System" OverwriteReadOnlyFiles="true" />
-  </Target>
 
 
 </Project>

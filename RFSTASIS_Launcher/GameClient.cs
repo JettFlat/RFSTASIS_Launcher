@@ -93,21 +93,21 @@ namespace RFSTASIS_Launcher
         {
             ConcurrentBag<FileInfoContainer> res = new ConcurrentBag<FileInfoContainer>();
             var files = Directory.GetFiles(Path, "", SearchOption.AllDirectories);
-            Parallel.ForEach(files,Model.SettingsCur.HashOptions, file =>
-            {
-                try
-                {
-                    var fi = new FileInfo(file);
-                    var item = new FileInfoContainer { Name = fi.Name, FilePath = fi.FullName, DateEdit = fi.LastWriteTime };
-                    using (var str = File.OpenRead(fi.FullName))
-                        item.MD5Hash = MD5Hash.GetHash(str);
-                    res.Add(item);
-                }
-                catch (Exception exc)
-                {
-                    new Exception($"Can't get hash of file{file}", exc).Write();
-                }
-            });
+            Parallel.ForEach(files, Model.SettingsCur.HashOptions, file =>
+             {
+                 try
+                 {
+                     var fi = new FileInfo(file);
+                     var item = new FileInfoContainer { Name = fi.Name, FilePath = fi.FullName, DateEdit = fi.LastWriteTime };
+                     using (var str = File.OpenRead(fi.FullName))
+                         item.MD5Hash = MD5Hash.GetHash(str);
+                     res.Add(item);
+                 }
+                 catch (Exception exc)
+                 {
+                     new Exception($"Can't get hash of file{file}", exc).Write();
+                 }
+             });
             return res;
         }
         public void GetUpdates()
@@ -127,6 +127,16 @@ namespace RFSTASIS_Launcher
                 try
                 {
                     var args = $"{id} \"{ExecutionFileName}\" \"[NEW]{ExecutionFileName}\"";
+                    var filename = "Replacer.exe";
+                    if (!File.Exists(filename))
+                    {
+                        var obj = GetStreamFromEmbeddedResources(filename);
+                        using (var fileStream = File.Create(filename))
+                        {
+                            obj.CopyTo(fileStream);
+                        }
+                        obj.Close();
+                    }
                     Process.Start("Replacer.exe", args);
                     Environment.Exit(0);
                 }
@@ -330,7 +340,7 @@ namespace RFSTASIS_Launcher
                     var height = devMode.dmPelsHeight;
                     return $"{width}×{height}";
                 }
-                catch (Exception){}
+                catch (Exception) { }
                 return "800×600";
             }
             public static List<string> GetResolutions()
@@ -338,10 +348,10 @@ namespace RFSTASIS_Launcher
                 var res = GetResolution();
                 string textres = "320×240:352×240:352×288:400×240:480×576:640×240:640×360:640×480:800×480:800×600:854×480:1024×600:1024×768:1152×864:1200×600:1280×768:1366×768:1280×1024:1440×900:1400×1050:1536×960:1536×1024:1600×900:1600×1024:1600×1200:1680×1050:1920×1080:1920×1200:2048×1152:2048×1536:2560×1440:2560×1600:3200×2048:3200×2400:3840×2400:3840×2160:5120×4096:6400×4096:6400×4800:7680×4320:7680×4800";
                 var allres = textres.Split(':').ToList();
-                if(allres.Contains(res))
+                if (allres.Contains(res))
                 {
                     var ind = allres.IndexOf(res);
-                    var result = allres.Take(ind+1).ToList();
+                    var result = allres.Take(ind + 1).ToList();
                     return result;
                 }
                 return allres.Take(allres.IndexOf("800×600") + 1).ToList();

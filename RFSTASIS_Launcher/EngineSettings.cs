@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Windows;
 using System.Globalization;
+using RFSTASIS_Launcher;
 
 namespace rlgn
 {
@@ -29,6 +30,15 @@ namespace rlgn
         }
         public void Read(string path = "R3Engine.ini")
         {
+            if (!File.Exists(path))
+            {
+                var obj = Model.GetStreamFromEmbeddedResources(path);
+                using (var fileStream = File.Create(path))
+                {
+                    obj.CopyTo(fileStream);
+                }
+                obj.Close();
+            }
             cfile = File.ReadAllLines(path);
             readsettings();
         }

@@ -60,13 +60,11 @@ namespace RFSTASIS_Launcher
             }
         }
         SoundPlayer Splayer { get; } = GetPlayer();
-        static SoundPlayer GetPlayer(string wavsound = @"System/labmg.wav")
+        static SoundPlayer GetPlayer()
         {
-            if (System.IO.File.Exists(wavsound))
-            {
-                return new SoundPlayer(wavsound);
-            }
-            return null;
+            var str = Model.GetStreamFromEmbeddedResources("labmg.wav");
+            var player= new SoundPlayer(str);
+            return player;
         }
         public bool CanLogin => gameClient.CanLogin;
         public string DisplayedImage

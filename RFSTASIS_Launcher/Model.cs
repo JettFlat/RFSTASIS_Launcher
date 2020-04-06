@@ -11,17 +11,20 @@ using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Diagnostics;
 using MiniLauncher.Data;
+using System.Reflection;
 
 namespace RFSTASIS_Launcher
 {
     class Model
     {
+        static Assembly assembly { get; } = Assembly.GetExecutingAssembly();
         public static Settings SettingsCur = Settings.Deserialize();
         public static GameClient GClient = new GameClient();
+        public static List<string> EmbeddedResourceFiles { get; } = assembly.GetManifestResourceNames().ToList();
         public static string ExecutionFileName { get; } = System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName;
-        
         static public void Start()
         {
+            //var test = ;
             GClient.GetUpdates();
         }
         public class Settings
@@ -46,9 +49,9 @@ namespace RFSTASIS_Launcher
                     FilesToIgnore = new List<string> {
                         "MD5 Hash Updater.deps.json","MD5 Hash Updater.dll","MD5 Hash Updater.exe","MD5 Hash Updater.pdb","MD5 Hash Updater.runtimeconfig.dev.json","MD5 Hash Updater.runtimeconfig.json"
                         ,"Exceptions.txt","NetLog\\rfclient.log","NetLog\\Odin.log","NetLog\\EffectLog.log","NetLog\\Client-Net.log","NetLog\\CEngineLog.log","NetLog\\Critical.Log","ClientSettings.json",
-                        "RFStasis_Launcher.exe",
+                        "RFStasis_Launcher.exe","R3Engine.ini",
                     },
-                    FilesToNotUpdate = new List<string> { "R3Engine.ini", "System\\DefaultSet.tmp" },
+                    FilesToNotUpdate = new List<string> { "System\\DefaultSet.tmp" },
                     Servercfg = new ServerSetting
                     {
                         LogginAddress = "64.31.6.86:10001",
@@ -57,7 +60,7 @@ namespace RFSTASIS_Launcher
                         ServerAddress = "64.31.6.86:27780",
                         ServerIndexSelect = 0
                     },
-                    HashOptions = new ParallelOptions { MaxDegreeOfParallelism=4},
+                    HashOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 },
                     DownloadOptions = new ParallelOptions(),
                 };
                 set.Serialize();
@@ -68,7 +71,6 @@ namespace RFSTASIS_Launcher
                 File.WriteAllText(path, JsonConvert.SerializeObject(this));
             }
         }
-
         public class MD5Hash
         {
             public static string GetHash(Stream file)
@@ -112,13 +114,20 @@ namespace RFSTASIS_Launcher
                 }
             }
         }
+        public static Stream GetStreamFromEmbeddedResources(string Filename)
+        {
+            var resourceName = assembly.GetManifestResourceNames().ToList().FirstOrDefault(str => str.EndsWith(Filename));
+            Stream stream = assembly.GetManifestResourceStream(resourceName);
+            return stream;
+        }
     }
     public class Server : VMBase
     {
         BlockingCollection<string> Paths { get; set; } = new BlockingCollection<string> { Model.SettingsCur.WebClientPath };
         BlockingCollection<string> FilesLink { get; set; } = new BlockingCollection<string>();
         int _FilesToDownloadCount = 0;
-        public int FilesToDownloadCount {
+        public int FilesToDownloadCount
+        {
             get => _FilesToDownloadCount;
             set
             {
@@ -148,7 +157,7 @@ namespace RFSTASIS_Launcher
                 OnPropertyChanged();
             }
         }
-        string _DownloadedFileName ="";
+        string _DownloadedFileName = "";
         public string DownloadedFileName
         {
             get => _DownloadedFileName;
@@ -182,7 +191,7 @@ namespace RFSTASIS_Launcher
             }
             return null;
         }
-       
+
         public byte[] DownloadHashFile()
         {
             try
@@ -222,11 +231,11 @@ namespace RFSTASIS_Launcher
                    }
                    finally
                    {
-                       lock(locker)
+                       lock (locker)
                        {
                            DownloadedFiles++;
                            DownloadedFileName = cfile.FilePath;
-                           var test  = (int)((double)DownloadedFiles / (double)FilesToDownloadCount * 100);
+                           var test = (int)((double)DownloadedFiles / (double)FilesToDownloadCount * 100);
                            DownloadProgres = test;
                        }
                        //System.Threading.Interlocked.Increment(ref DownloadedFiles.Value);
